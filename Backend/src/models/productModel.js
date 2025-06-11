@@ -98,7 +98,7 @@ productSchema.pre("save", async function (next) {
 // Method to calculate discounted price
 productSchema.methods.getDiscountedPrice = function () {
   if (this.discount > 0) {
-    return this.price - (this.price * this.discount) / 100;
+    return Math.floor(this.price - (this.price * this.discount) / 100);
   }
   return this.price;
 };

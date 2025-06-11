@@ -93,3 +93,21 @@ export const verifySeller = (req, res, next) => {
     );
   }
 };
+
+export const verifyUser = (req, res, next) => {
+  try {
+    if (!req.user) {
+      return next(
+        new ErrorHandler("Unauthorized: User not authenticated", 401)
+      );
+    }
+    if (req.user.role !== "user") {
+      return next(new ErrorHandler("Unauthorized: User role required", 403));
+    }
+    next();
+  } catch (error) {
+    return next(
+      new ErrorHandler(`User verification failed: ${error.message}`, 500)
+    );
+  }
+};

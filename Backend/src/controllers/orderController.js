@@ -11,7 +11,6 @@ const createOrder = async (req, res, next) => {
   try {
     const { shippingAddressId, paymentMethod } = req.body;
 
-    // Validate required fields
     if (!shippingAddressId || !paymentMethod) {
       return next(
         new ErrorHandler(
@@ -21,12 +20,10 @@ const createOrder = async (req, res, next) => {
       );
     }
 
-    // Validate payment method
     if (!["cash_on_delivery", "online"].includes(paymentMethod)) {
       return next(new ErrorHandler("Invalid payment method", 400));
     }
 
-    // Validate shipping address
     const address = await Address.findById(shippingAddressId);
     if (!address || address.user.toString() !== req.user.id) {
       return next(
@@ -34,7 +31,6 @@ const createOrder = async (req, res, next) => {
       );
     }
 
-    // Get user's cart
     const cart = await Cart.findOne({ user: req.user.id }).populate(
       "items.product"
     );
@@ -42,7 +38,6 @@ const createOrder = async (req, res, next) => {
       return next(new ErrorHandler("Cart is empty", 400));
     }
 
-    // Calculate total amount and validate stock
     let totalAmount = 0;
     const orderItems = [];
     const productUpdates = [];
@@ -76,24 +71,20 @@ const createOrder = async (req, res, next) => {
       });
     }
 
-    // Create payment record for online payments
     let payment;
     if (paymentMethod === "online") {
-      // Assume payment processing is handled externally; create a placeholder payment
       payment = await Payment.create({
         user: req.user.id,
         amount: totalAmount,
-        paymentStatus: "pending", // Update status after external processing
+        paymentStatus: "pending",
       });
     }
 
-    // Determine seller (assume single seller per order for simplicity)
-    const sellerId = cart.items[0].product.seller; // First product's seller
+    const sellerId = cart.items[0].product.seller;
     if (!sellerId) {
       return next(new ErrorHandler("Seller not found for products", 404));
     }
 
-    // Create order
     const order = await Order.create({
       user: req.user.id,
       products: orderItems,
@@ -111,10 +102,8 @@ const createOrder = async (req, res, next) => {
       seller: sellerId,
     });
 
-    // Update product stock
     await Product.bulkWrite(productUpdates);
 
-    // Clear user's cart
     cart.items = [];
     await cart.save();
 
@@ -187,25 +176,25 @@ const updateOrderStatus = async (req, res, next) => {
 // Cancel an order (requires user role for own orders, or admin)
 const cancelOrder = async (req, res, next) => {
   try {
-    const { orderId } = req.params;
+    const { id: orderId } = req.params;
 
-    // Validate order exists
     const order = await Order.findById(orderId);
     if (!order) {
       return next(new ErrorHandler("Order not found", 404));
     }
 
-    // Check authorization: user can cancel own orders, admin can cancel any
-    if (order.user.toString() !== req.user.id && req.user.role !== "admin") {
+    if (
+      order.user.toString() !== req.user.id &&
+      req.user.role !== "admin" &&
+      order.seller.toString() !== req.user.id
+    ) {
       return next(new ErrorHandler("Not authorized to cancel this order", 403));
     }
 
-    // Check if order can be canceled
     if (order.orderStatus !== "pending") {
       return next(new ErrorHandler("Only pending orders can be canceled", 400));
     }
 
-    // Restore product stock
     const productUpdates = order.products.map((item) => ({
       updateOne: {
         filter: { _id: item.product },
@@ -215,8 +204,7 @@ const cancelOrder = async (req, res, next) => {
 
     await Product.bulkWrite(productUpdates);
 
-    // Delete order
-    await order.remove();
+    await Order.findByIdAndDelete(orderId);
 
     res.status(200).json({
       success: true,
@@ -299,7 +287,6 @@ const getOrderById = async (req, res, next) => {
       return next(new ErrorHandler("Order not found", 404));
     }
 
-    // Check authorization: user, seller, or admin
     if (
       order.user.toString() !== req.user.id &&
       order.seller.toString() !== req.user.id &&

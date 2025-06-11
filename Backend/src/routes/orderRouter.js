@@ -22,6 +22,6 @@ router.route("/orders/seller").get(verifyToken, verifySeller, getSellerOrders);
 router
   .route("/order/status/update/:id")
   .put(verifyToken, verifySeller, updateOrderStatus);
-router.route("/order/get/:id").get(verifyToken, verifySeller, getOrderById);
+router.route("/order/get/:id").get(verifyToken, getOrderById);
 
 export default router;
