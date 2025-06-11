@@ -52,7 +52,7 @@ import productRouter from "./routes/productsRouter.js";
 import orderRouter from "./routes/orderRouter.js";
 // import adminRouter from "./routes/adminRouter.js";
 import reviewRouter from "./routes/reviewsRouter.js";
-// import paymentRouter from "./routes/paymentRouter.js";
+import paymentRouter from "./routes/paymentRouter.js";
 import cartRouter from "./routes/cartRouter.js";
 
 app.use("/api/v1", userRouter);
@@ -62,7 +62,7 @@ app.use("/api/v1", orderRouter);
 app.use("/api/v1", cartRouter);
 // app.use("/api/v1", adminRouter);
 app.use("/api/v1", reviewRouter);
-// app.use("/api/v1", paymentRouter);
+app.use("/api/v1", paymentRouter);
 
 // Global error handling middleware
 app.use((err, req, res, next) => {

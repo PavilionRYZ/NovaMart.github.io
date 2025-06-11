@@ -144,6 +144,8 @@ const getProductById = async (req, res, next) => {
     }
 
     const product = await Product.findById(id)
+      .populate("reviews", "rating comment images replies likes isVerifiedPurchase user")
+      .sort({ createdAt: -1 });
 
     if (!product || !product.isActive) {
       return next(new ErrorHandler("Product not found or inactive", 404));

@@ -92,7 +92,7 @@ const createReview = async (req, res, next) => {
 // Update a review (requires user role, only own review)
 const updateReview = async (req, res, next) => {
   try {
-    const { reviewId } = req.params;
+    const { id:reviewId } = req.params;
     const { rating, comment, images } = req.body;
 
     const review = await Review.findById(reviewId);
@@ -154,7 +154,7 @@ const updateReview = async (req, res, next) => {
 // Delete a review (requires user role for own review, or admin)
 const deleteReview = async (req, res, next) => {
   try {
-    const { reviewId } = req.params;
+    const { id:reviewId } = req.params;
 
     const review = await Review.findById(reviewId);
     if (!review) {
@@ -180,10 +180,10 @@ const deleteReview = async (req, res, next) => {
   }
 };
 
-// Get reviews for a product (accessible to authenticated users)
+// Get reviews for a product 
 const getProductReviews = async (req, res, next) => {
   try {
-    const { productId } = req.params;
+    const { id:productId } = req.params;
 
     if (!mongoose.isValidObjectId(productId)) {
       return next(new ErrorHandler("Invalid product ID", 400));
@@ -210,10 +210,10 @@ const getProductReviews = async (req, res, next) => {
   }
 };
 
-// Get a single review by ID (accessible to authenticated users)
+// Get a single review by ID 
 const getReviewById = async (req, res, next) => {
   try {
-    const { reviewId } = req.params;
+    const { id:reviewId } = req.params;
 
     if (!mongoose.isValidObjectId(reviewId)) {
       return next(new ErrorHandler("Invalid review ID", 400));
@@ -221,7 +221,7 @@ const getReviewById = async (req, res, next) => {
 
     const review = await Review.findById(reviewId)
       .populate("user", "firstName lastName avatar")
-      .populate("replies.user", "firstName lastName avatar");
+      .populate("replies.user", "firstName lastName avatar role");
 
     if (!review) {
       return next(new ErrorHandler("Review not found", 404));
@@ -242,7 +242,7 @@ const getReviewById = async (req, res, next) => {
 // Add a reply to a review (requires seller or admin role)
 const addReply = async (req, res, next) => {
   try {
-    const { reviewId } = req.params;
+    const { id:reviewId } = req.params;
     const { comment } = req.body;
 
     if (!comment) {
@@ -297,7 +297,7 @@ const addReply = async (req, res, next) => {
 // Like or unlike a review (requires user role)
 const toggleLikeReview = async (req, res, next) => {
   try {
-    const { reviewId } = req.params;
+    const { id:reviewId } = req.params;
 
     // Validate review exists
     const review = await Review.findById(reviewId);
@@ -333,7 +333,7 @@ const toggleLikeReview = async (req, res, next) => {
 // Mark a review as helpful (requires user role)
 const markReviewHelpful = async (req, res, next) => {
   try {
-    const { reviewId } = req.params;
+    const { id:reviewId } = req.params;
 
     const review = await Review.findById(reviewId);
     if (!review) {
