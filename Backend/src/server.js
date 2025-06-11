@@ -50,7 +50,7 @@ import userRouter from "./routes/userRouter.js";
 import addressRouter from "./routes/addressRouter.js";
 import productRouter from "./routes/productsRouter.js";
 import orderRouter from "./routes/orderRouter.js";
-// import adminRouter from "./routes/adminRouter.js";
+import adminRouter from "./routes/adminRouter.js";
 import reviewRouter from "./routes/reviewsRouter.js";
 import paymentRouter from "./routes/paymentRouter.js";
 import cartRouter from "./routes/cartRouter.js";
@@ -60,7 +60,7 @@ app.use("/api/v1", addressRouter);
 app.use("/api/v1", productRouter);
 app.use("/api/v1", orderRouter);
 app.use("/api/v1", cartRouter);
-// app.use("/api/v1", adminRouter);
+app.use("/api/v1", adminRouter);
 app.use("/api/v1", reviewRouter);
 app.use("/api/v1", paymentRouter);
 
