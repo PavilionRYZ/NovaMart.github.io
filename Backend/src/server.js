@@ -21,11 +21,11 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI,
-      ttl: 24 * 60 * 60, // 1 day in seconds
+      ttl: 24 * 60 * 60,
     }),
     cookie: {
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
