@@ -8,8 +8,12 @@ import { verifyAdmin, verifyToken } from "../middleware/verifyUsers.js";
 
 const router = express.Router();
 
-router.route("/users/get/all").get(verifyToken, verifyAdmin, getAllUsers);
-router.route("/user/role/change/:id").put(verifyToken, verifyAdmin, changeUserRole);
-router.route("/user/delete/:id").delete(verifyToken, verifyAdmin, deleteUser);
+router.route("/admin/users/get/all").get(verifyToken, verifyAdmin, getAllUsers);
+router
+  .route("/admin/user/role/change/:id")
+  .put(verifyToken, verifyAdmin, changeUserRole);
+router
+  .route("/admin/user/delete/:id")
+  .delete(verifyToken, verifyAdmin, deleteUser);
 
 export default router;

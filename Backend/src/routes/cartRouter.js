@@ -13,7 +13,7 @@ const router = express.Router();
 router.route("/cart/get").get(verifyToken, getCart);
 router.route("/cart/add/item").post(verifyToken, addItemToCart);
 router.route("/cart/update/item").put(verifyToken, updateItemQuantity);
-router.route("/cart/remove/item/:id").delete(verifyToken, removeItemFromCart);
+router.route("/cart/remove/item").delete(verifyToken, removeItemFromCart);
 router.route("/cart/clear").delete(verifyToken, clearCart);
 
 export default router;

@@ -1,6 +1,7 @@
 import Product from "../models/productModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import mongoose from "mongoose";
+import ApiFeatures from "../utils/apiFeatures.js";
 
 const createProduct = async (req, res, next) => {
   try {
@@ -79,36 +80,47 @@ const createProduct = async (req, res, next) => {
 
 const getAllProducts = async (req, res, next) => {
   try {
-    const { category, search, minPrice, maxPrice } = req.query;
-    const query = { isActive: true };
+    const resultPerPage = Number(req.query.limit) || 12;
 
-    // Filter by category
-    if (category) query.category = category;
+    // Create API Features instance
+    const apiFeature = new ApiFeatures(
+      Product.find({ isActive: true }),
+      req.query
+    )
+      .search()
+      .filter()
+      .pagination(resultPerPage);
 
-    // Filter by price range
-    if (minPrice) query.price = { ...query.price, $gte: Number(minPrice) };
-    if (maxPrice) query.price = { ...query.price, $lte: Number(maxPrice) };
+    // Execute query to get products
+    const products = await apiFeature.query.populate(
+      "seller",
+      "firstName lastName"
+    );
 
-    // Search by name
-    if (search) query.$text = { $search: search };
-
-    const products = await Product.find(query)
-      .populate("seller", "firstName lastName")
-      .sort({ createdAt: -1 });
-
-    if (!products || products.length === 0) {
-      return next(new ErrorHandler("No active products found", 404));
-    }
+    // Count total products for pagination
+    const totalProducts = await Product.countDocuments({
+      isActive: true,
+      ...apiFeature.query._conditions,
+    });
 
     res.status(200).json({
       success: true,
       message: "Products retrieved successfully",
-      data: products,
+      data: {
+        products: Array.isArray(products) ? products : [],
+        pagination: {
+          total: totalProducts,
+          page: Number(req.query.page) || 1,
+          limit: resultPerPage,
+          totalPages: Math.ceil(totalProducts / resultPerPage),
+        },
+      },
     });
   } catch (error) {
-    return next(
-      new ErrorHandler(`Failed to retrieve products: ${error.message}`, 500)
-    );
+    return res.status(500).json({
+      success: false,
+      message: `Failed to retrieve products: ${error.message}`,
+    });
   }
 };
 
@@ -144,7 +156,10 @@ const getProductById = async (req, res, next) => {
     }
 
     const product = await Product.findById(id)
-      .populate("reviews", "rating comment images replies likes isVerifiedPurchase user")
+      .populate(
+        "reviews",
+        "rating comment images replies likes isVerifiedPurchase user"
+      )
       .sort({ createdAt: -1 });
 
     if (!product || !product.isActive) {

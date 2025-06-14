@@ -35,6 +35,23 @@ const sendResponseWithToken = (user, res) => {
     });
 };
 
+const getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(`Failed to get user: ${error.message}`, 500));
+  }
+};
+
 const signup = async (req, res, next) => {
   try {
     const { email, password, phone, firstName, lastName, avatar } = req.body;
@@ -405,4 +422,5 @@ export {
   forgotPassword,
   resetPassword,
   sendResponseWithToken,
+  getCurrentUser,
 };

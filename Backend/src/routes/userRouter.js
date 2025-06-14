@@ -9,6 +9,7 @@ import {
   forgotPassword,
   resetPassword,
   sendResponseWithToken,
+  getCurrentUser,
 } from "../controllers/userController.js";
 import { verifyToken } from "../middleware/verifyUsers.js";
 import rateLimit from "express-rate-limit";
@@ -16,7 +17,6 @@ import User from "../models/userModel.js";
 import { verifyGoogleToken } from "../utils/googleOAuth.js";
 
 const router = express.Router();
-
 
 // Rate limiting for login route
 const loginLimiter = rateLimit({
@@ -26,8 +26,8 @@ const loginLimiter = rateLimit({
 });
 
 const userLimiter = rateLimit({
-  windowMs: 60 * 1000, 
-  max: 100, 
+  windowMs: 60 * 1000,
+  max: 100,
   message: "Too many requests, please try again later",
 });
 
@@ -44,6 +44,7 @@ const resetLimiter = rateLimit({
 });
 
 // Manual routes
+router.route("/user/get/me").get(verifyToken, getCurrentUser);
 router.route("/user/signup").post(signup);
 router.route("/user/verify-otp").post(verifyOtp);
 router.route("/user/login").post(loginLimiter, login);
@@ -85,6 +86,5 @@ router.post("/auth/google", async (req, res) => {
     res.status(500).json({ error: "Authentication failed" });
   }
 });
-
 
 export default router;

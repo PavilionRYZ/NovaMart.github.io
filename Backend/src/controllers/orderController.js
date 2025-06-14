@@ -286,10 +286,14 @@ const getOrderById = async (req, res, next) => {
     if (!order) {
       return next(new ErrorHandler("Order not found", 404));
     }
-
+    // console.log("Order ID:", orderId);
+    // console.log("Order user ID:", order.user._id.toString());
+    // console.log("Authenticated user ID:", req.user.id);
+    // console.log("Order seller ID:", order.seller.toString());
+    // console.log("User role:", req.user.role);
     if (
-      order.user.toString() !== req.user.id &&
-      order.seller.toString() !== req.user.id &&
+      order.user._id.toString() !== req.user.id && 
+      order.seller._id.toString() !== req.user.id && 
       req.user.role !== "admin"
     ) {
       return next(new ErrorHandler("Not authorized to view this order", 403));

@@ -212,7 +212,7 @@ const updateItemQuantity = async (req, res, next) => {
 // Remove item from cart
 const removeItemFromCart = async (req, res, next) => {
   try {
-    const { id: productId } = req.params;
+    const { productId } = req.body;
 
     if (!mongoose.isValidObjectId(productId)) {
       return next(new ErrorHandler("Invalid product ID", 400));

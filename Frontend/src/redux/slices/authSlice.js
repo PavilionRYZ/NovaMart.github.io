@@ -135,7 +135,7 @@ export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
   async (profileData, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(`${API_URL}/user/update`, profileData);
+      const response = await axios.patch(`${API_URL}/user/update-profile`, profileData);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -158,6 +158,20 @@ export const updatePassword = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to update password"
+      );
+    }
+  }
+);
+
+export const getCurrentUser = createAsyncThunk(
+  "auth/getCurrentUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/user/get/me`);
+      return response.data.user;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to get current user"
       );
     }
   }
@@ -300,6 +314,21 @@ const authSlice = createSlice({
       .addCase(updatePassword.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+      .addCase(getCurrentUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = "";
+        state.message = null;
+      })
+      .addCase(getCurrentUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true; // Ensure isAuthenticated is set
+      })
+      .addCase(getCurrentUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        state.isAuthenticated = false;
       });
   },
 });
