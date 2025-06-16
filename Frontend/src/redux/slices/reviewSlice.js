@@ -1,9 +1,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-axios.defaults.withCredentials = true;
-
 const API_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
+
+const publicAxios = axios.create({
+  baseURL: API_URL,
+  withCredentials: false,
+});
+
+const authAxios = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
 
 const initialState = {
   reviews: [],
@@ -13,12 +21,11 @@ const initialState = {
   message: null,
 };
 
-// Create a new review
 export const createReview = createAsyncThunk(
   "review/createReview",
   async ({ id, reviewData }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
+      const response = await authAxios.post(
         `${API_URL}/product/review/create/${id}`,
         reviewData
       );
@@ -31,12 +38,11 @@ export const createReview = createAsyncThunk(
   }
 );
 
-// Update a review
 export const updateReview = createAsyncThunk(
   "review/updateReview",
   async ({ id, reviewData }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(
+      const response = await authAxios.put(
         `${API_URL}/product/review/update/${id}`,
         reviewData
       );
@@ -49,12 +55,11 @@ export const updateReview = createAsyncThunk(
   }
 );
 
-// Delete a review
 export const deleteReview = createAsyncThunk(
   "review/deleteReview",
   async ({ id }, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/product/review/delete/${id}`);
+      await authAxios.delete(`${API_URL}/product/review/delete/${id}`);
       return { id };
     } catch (error) {
       return rejectWithValue(
@@ -64,12 +69,13 @@ export const deleteReview = createAsyncThunk(
   }
 );
 
-// Get all reviews for a product
 export const getProductReviews = createAsyncThunk(
   "review/getProductReviews",
   async ({ id }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/product/reviews/get/${id}`);
+      const response = await publicAxios.get(
+        `${API_URL}/product/reviews/get/${id}`
+      );
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -79,12 +85,11 @@ export const getProductReviews = createAsyncThunk(
   }
 );
 
-// Get a single review by ID
 export const getReviewById = createAsyncThunk(
   "review/getReviewById",
   async ({ id }, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/review/get/${id}`);
+      const response = await publicAxios.get(`${API_URL}/review/get/${id}`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -94,12 +99,11 @@ export const getReviewById = createAsyncThunk(
   }
 );
 
-// Add a reply to a review
 export const replyReview = createAsyncThunk(
   "review/replyReview",
   async ({ id, comment }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/review/reply/${id}`, {
+      const response = await authAxios.post(`${API_URL}/review/reply/${id}`, {
         comment,
       });
       return response.data.data;
@@ -111,12 +115,11 @@ export const replyReview = createAsyncThunk(
   }
 );
 
-// Toggle like/unlike a review
 export const toggleLikeReview = createAsyncThunk(
   "review/toggleLikeReview",
   async ({ id }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/review/like/${id}`);
+      const response = await authAxios.post(`${API_URL}/review/like/${id}`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -126,12 +129,11 @@ export const toggleLikeReview = createAsyncThunk(
   }
 );
 
-// Mark a review as helpful
 export const markReviewHelpful = createAsyncThunk(
   "review/markReviewHelpful",
   async ({ id }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/review/helpful/${id}`);
+      const response = await authAxios.post(`${API_URL}/review/helpful/${id}`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(

@@ -20,7 +20,7 @@ import OrderDetails from './components/pages/userPages/OrderDetails';
 import Cart from './components/pages/orderPages/Cart';
 import AddressSelection from './components/pages/orderPages/AddressSection';
 import Payment from './components/pages/orderPages/Payment';
-
+import ProductDetails from './components/pages/productPages/ProductDetails';
 
 const App = () => {
   const { isLoading } = useSelector((state) => state.auth);
@@ -134,6 +134,14 @@ const App = () => {
                   element={
                     <ProtectedRoute forAuth={false}>
                       <SearchPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/product/:id"
+                  element={
+                    <ProtectedRoute forAuth={false}>
+                      <ProductDetails />
                     </ProtectedRoute>
                   }
                 />
