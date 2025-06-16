@@ -3,7 +3,15 @@ import axios from "axios";
 
 const API_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
 
-axios.defaults.withCredentials = true;
+const publicAxios = axios.create({
+  baseURL: API_URL,
+  withCredentials: false,
+});
+
+const authAxios = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
 
 const initialState = {
   products: [],
@@ -20,12 +28,13 @@ const initialState = {
   message: null,
 };
 
-// Get all products with optional filters
 export const getProducts = createAsyncThunk(
   "products/getProducts",
   async (filters = {}, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/product/get/all`, {
+      // console.log("Making request to getProducts with filters:", filters);
+      // console.log("API_URL:", API_URL);
+      const response = await publicAxios.get(`${API_URL}/product/get/all`, {
         params: {
           keyword: filters.keyword,
           category: filters.category,
@@ -36,8 +45,13 @@ export const getProducts = createAsyncThunk(
           limit: filters.limit,
         },
       });
+      // console.log("getProducts response:", response.data);
       return response.data.data;
     } catch (error) {
+      console.error(
+        "Error in getProducts:",
+        error.response?.data || error.message
+      );
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch products"
       );
@@ -45,12 +59,13 @@ export const getProducts = createAsyncThunk(
   }
 );
 
-// Get single product by ID
 export const getSingleProduct = createAsyncThunk(
   "products/getSingleProduct",
   async (productId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/product/get/${productId}`);
+      const response = await publicAxios.get(
+        `${API_URL}/product/get/${productId}`
+      );
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
@@ -60,12 +75,11 @@ export const getSingleProduct = createAsyncThunk(
   }
 );
 
-// Create a new product
 export const createProduct = createAsyncThunk(
   "products/createProduct",
   async (productData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
+      const response = await authAxios.post(
         `${API_URL}/product/add/new`,
         productData
       );
@@ -78,12 +92,11 @@ export const createProduct = createAsyncThunk(
   }
 );
 
-// Update a product
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
   async ({ productId, productData }, { rejectWithValue }) => {
     try {
-      const response = await axios.patch(
+      const response = await authAxios.patch(
         `${API_URL}/product/update/${productId}`,
         productData
       );
@@ -96,12 +109,11 @@ export const updateProduct = createAsyncThunk(
   }
 );
 
-// Delete a product
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
   async (productId, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(
+      const response = await authAxios.delete(
         `${API_URL}/product/delete/${productId}`
       );
       return { productId, message: response.data.message };
@@ -113,12 +125,11 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
-// Get seller's products
 export const getSellerProducts = createAsyncThunk(
   "products/getSellerProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/product/get/seller`);
+      const response = await authAxios.get(`${API_URL}/product/get/seller`);
       return response.data.data;
     } catch (error) {
       return rejectWithValue(

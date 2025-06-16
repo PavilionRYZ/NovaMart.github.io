@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getOrderById } from '../../../redux/slices/orderSlice';
+import {getPaymentByOrderId} from '../../../redux/slices/paymentSlice';
 import { Button } from '../../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Skeleton } from '../../ui/skeleton';
@@ -13,7 +14,7 @@ const OrderDetails = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { order, isLoading, error, message } = useSelector((state) => state.order);
-
+    // const { payment, isLoadingPayment, errorPayment, messagePayment } = useSelector((state) => state.payment);
     useEffect(() => {
         // console.log('Order ID from useParams:', id);
         if (id && typeof id === 'string') {
@@ -173,6 +174,9 @@ const OrderDetails = () => {
                                         </h3>
                                         <div className="border rounded-lg p-3 bg-gray-50">
                                             <p>Method: {order.paymentMethod}</p>
+                                            {/* {order.paymentMethod === 'online' && (
+                                                <p>Status: {order.paymentStatus}</p>
+                                            )} */}
                                             <p>Amount: ${order.totalAmount.toFixed(2)}</p>
                                         </div>
                                     </div>

@@ -90,19 +90,19 @@ const getAllProducts = async (req, res, next) => {
       .search()
       .filter()
       .pagination(resultPerPage);
-
+      console.log("Query conditions:", apiFeature.query._conditions);
     // Execute query to get products
     const products = await apiFeature.query.populate(
       "seller",
       "firstName lastName"
     );
-
+    // console.log("Products retrieved:", products);
     // Count total products for pagination
     const totalProducts = await Product.countDocuments({
       isActive: true,
       ...apiFeature.query._conditions,
     });
-
+    // console.log("Total products count:", totalProducts);
     res.status(200).json({
       success: true,
       message: "Products retrieved successfully",
@@ -117,6 +117,7 @@ const getAllProducts = async (req, res, next) => {
       },
     });
   } catch (error) {
+    // console.error("Error in getAllProducts:", error);
     return res.status(500).json({
       success: false,
       message: `Failed to retrieve products: ${error.message}`,
