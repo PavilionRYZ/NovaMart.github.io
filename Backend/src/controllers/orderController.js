@@ -71,14 +71,14 @@ const createOrder = async (req, res, next) => {
       });
     }
 
-    let payment;
-    if (paymentMethod === "online") {
-      payment = await Payment.create({
-        user: req.user.id,
-        amount: totalAmount,
-        paymentStatus: "pending",
-      });
-    }
+    // let payment;
+    // if (paymentMethod === "online") {
+    //   payment = await Payment.create({
+    //     user: req.user.id,
+    //     amount: totalAmount,
+    //     paymentStatus: "pending",
+    //   });
+    // }
 
     const sellerId = cart.items[0].product.seller;
     if (!sellerId) {
@@ -97,7 +97,6 @@ const createOrder = async (req, res, next) => {
         zipCode: address.zipCode,
       },
       paymentMethod,
-      payment: payment ? payment._id : undefined,
       orderStatus: "pending",
       seller: sellerId,
     });

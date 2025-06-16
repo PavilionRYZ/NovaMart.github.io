@@ -5,8 +5,8 @@ const API_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
 axios.defaults.withCredentials = true;
 
 const initialState = {
-  payment: null,
-  payments: [],
+  paymentIntent: null,
+  paymentId: null,
   stripeConfig: null,
   isLoading: false,
   error: null,
@@ -40,6 +40,23 @@ export const createPaymentIntent = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to create payment intent"
+      );
+    }
+  }
+);
+
+// Verify payment
+export const verifyPayment = createAsyncThunk(
+  "payment/verifyPayment",
+  async (paymentId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/payments/verify`, {
+        paymentId,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to verify payment"
       );
     }
   }
@@ -85,7 +102,8 @@ const paymentSlice = createSlice({
       state.error = null;
       state.message = null;
       state.isLoading = false;
-      state.payment = null;
+      state.paymentIntent = null;
+      state.paymentId = null;
     },
   },
   extraReducers: (builder) => {
@@ -113,10 +131,25 @@ const paymentSlice = createSlice({
       })
       .addCase(createPaymentIntent.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.payment = action.payload;
+        state.paymentIntent = action.payload;
+        state.paymentId = action.payload.paymentId;
         state.message = "Payment intent created successfully";
       })
       .addCase(createPaymentIntent.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Verify payment
+      .addCase(verifyPayment.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+        state.message = null;
+      })
+      .addCase(verifyPayment.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.message = action.payload.message;
+      })
+      .addCase(verifyPayment.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })

@@ -9,7 +9,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // Create a payment intent for online payment (requires user role)
 const createPaymentIntent = async (req, res, next) => {
   try {
-    const { id:orderId } = req.body;
+    const { id: orderId } = req.body;
 
     if (!mongoose.isValidObjectId(orderId)) {
       return next(new ErrorHandler("Invalid order ID", 400));
@@ -38,25 +38,28 @@ const createPaymentIntent = async (req, res, next) => {
       return next(new ErrorHandler("Order already paid", 400));
     }
 
-    const amountInCents = Math.round(order.totalAmount * 100);
+    const amount = Math.round(order.totalAmount * 100); // Convert to cents
     let paymentIntent;
     if (existingPayment) {
       paymentIntent = await stripe.paymentIntents.update(
         existingPayment.paymentId,
         {
-          amount: amountInCents,
+          amount: amount,
           currency: process.env.CURRENCY || "inr",
+          metadata: { orderId: orderId.toString(), userId: req.user.id },
+          automatic_payment_methods: { enabled: true },
         }
       );
     } else {
       paymentIntent = await stripe.paymentIntents.create({
-        amount: amountInCents,
-        currency: process.env.CURRENCY || "usd",
+        amount: amount,
+        currency: process.env.CURRENCY || "inr",
         metadata: { orderId: orderId.toString(), userId: req.user.id },
         automatic_payment_methods: { enabled: true },
+        description: `Payment for order #${orderId}`,
       });
 
-      await Payment.create({
+      const payment = await Payment.create({
         user: req.user.id,
         order: orderId,
         amount: order.totalAmount,
@@ -64,6 +67,8 @@ const createPaymentIntent = async (req, res, next) => {
         status: "pending",
         paymentMethod: "online",
       });
+
+      await Order.findByIdAndUpdate(orderId, { payment: payment._id });
     }
 
     res.status(200).json({
@@ -87,12 +92,53 @@ const createPaymentIntent = async (req, res, next) => {
   }
 };
 
+// Verify payment (fallback if webhook fails)
+const verifyPayment = async (req, res, next) => {
+  try {
+    const { paymentId } = req.body;
+    const userId = req.user.id;
+
+    if (!paymentId) {
+      return next(new ErrorHandler("Payment ID is required", 400));
+    }
+
+    const payment = await Payment.findOne({ paymentId }).populate("order");
+    if (!payment || payment.user.toString() !== userId) {
+      return next(new ErrorHandler("Payment not found or unauthorized", 404));
+    }
+
+    if (payment.status !== "pending") {
+      return next(new ErrorHandler("Payment already processed", 400));
+    }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+    if (paymentIntent.status !== "succeeded") {
+      payment.status = "failed";
+      await payment.save();
+      return next(new ErrorHandler("Payment verification failed", 400));
+    }
+
+    payment.status = "success";
+    payment.order.orderStatus = "dispatched";
+    await payment.save();
+    await payment.order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Payment verified successfully. Your order is now dispatched!",
+    });
+  } catch (error) {
+    return next(
+      new ErrorHandler(`Failed to verify payment: ${error.message}`, 500)
+    );
+  }
+};
+
 // Handle Stripe webhook events (public endpoint, no auth required)
 const handleWebhook = async (req, res, next) => {
   try {
     const sig = req.headers["stripe-signature"];
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
 
     let event;
     try {
@@ -119,22 +165,20 @@ const handleWebhook = async (req, res, next) => {
         );
       }
 
-
       const payment = await Payment.findOneAndUpdate(
         { paymentId: paymentIntent.id },
         { status: "success" },
         { new: true }
-      );
+      ).populate("order");
 
       if (!payment) {
         return next(new ErrorHandler("Payment record not found", 404));
       }
 
-
-      await Order.findByIdAndUpdate(orderId, { orderStatus: "dispatched" });
+      payment.order.orderStatus = "dispatched";
+      await payment.order.save();
     } else if (event.type === "payment_intent.payment_failed") {
       const paymentIntent = event.data.object;
-
 
       await Payment.findOneAndUpdate(
         { paymentId: paymentIntent.id },
@@ -156,7 +200,6 @@ const handleWebhook = async (req, res, next) => {
 const refundPayment = async (req, res, next) => {
   try {
     const { paymentId } = req.body;
-
 
     const payment = await Payment.findOne({ paymentId });
     if (!payment) {
@@ -181,6 +224,9 @@ const refundPayment = async (req, res, next) => {
     payment.status = "failed";
     await payment.save();
 
+    order.orderStatus = "cancelled";
+    await order.save();
+
     res.status(200).json({
       success: true,
       message: "Payment refunded successfully",
@@ -196,7 +242,7 @@ const refundPayment = async (req, res, next) => {
 // Get payment details by order ID (requires user for own orders or admin)
 const getPaymentByOrderId = async (req, res, next) => {
   try {
-    const { id:orderId } = req.params;
+    const { id: orderId } = req.params;
 
     if (!mongoose.isValidObjectId(orderId)) {
       return next(new ErrorHandler("Invalid order ID", 400));
@@ -226,6 +272,7 @@ const getPaymentByOrderId = async (req, res, next) => {
   }
 };
 
+// Get Stripe configuration (public endpoint)
 const getStripeConfig = async (req, res, next) => {
   try {
     res.status(200).json({
@@ -246,6 +293,7 @@ const getStripeConfig = async (req, res, next) => {
 
 export {
   createPaymentIntent,
+  verifyPayment,
   handleWebhook,
   refundPayment,
   getPaymentByOrderId,

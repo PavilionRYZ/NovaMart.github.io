@@ -42,9 +42,7 @@ const orderSchema = new mongoose.Schema(
     payment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Payment",
-      required: function () {
-        return this.paymentMethod === "online";
-      },
+      required: false, 
     },
     orderStatus: {
       type: String,

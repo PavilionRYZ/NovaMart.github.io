@@ -126,6 +126,7 @@ const orderSlice = createSlice({
       })
       .addCase(createOrder.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.order = action.payload;
         state.orders.push(action.payload);
         state.message = "Order created successfully";
       })

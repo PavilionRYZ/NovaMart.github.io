@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createPaymentIntent,
+  verifyPayment,
   handleWebhook,
   refundPayment,
   getPaymentByOrderId,
@@ -21,6 +22,9 @@ router
 router
   .route("/payments/intent")
   .post(verifyToken, verifyUser, createPaymentIntent);
+router
+  .route("/payments/verify")
+  .post(verifyToken, verifyUser, verifyPayment);
 router
   .route("/payments/order/:id")
   .get(verifyToken, verifyUser, getPaymentByOrderId);

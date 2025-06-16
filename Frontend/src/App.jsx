@@ -17,6 +17,9 @@ import UserAddress from './components/pages/userPages/UserAddress';
 import PageNotFound from './components/pages/PageNotFound';
 import UserOrders from './components/pages/userPages/UserOrders';
 import OrderDetails from './components/pages/userPages/OrderDetails';
+import Cart from './components/pages/orderPages/Cart';
+import AddressSelection from './components/pages/orderPages/AddressSection';
+import Payment from './components/pages/orderPages/Payment';
 
 
 const App = () => {
@@ -99,6 +102,30 @@ const App = () => {
                   element={
                     <ProtectedRoute forAuth={false}>
                       <OrderDetails />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cart"
+                  element={
+                    <ProtectedRoute forAuth={false}>
+                      <Cart />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cart/address"
+                  element={
+                    <ProtectedRoute forAuth={false}>
+                      <AddressSelection />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cart/payment"
+                  element={
+                    <ProtectedRoute forAuth={false}>
+                      <Payment />
                     </ProtectedRoute>
                   }
                 />
