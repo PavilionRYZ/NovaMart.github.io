@@ -14,7 +14,7 @@ const ProductCard = ({ product }) => {
 
     const handleAddToCart = () => {
         dispatch(addItemToCart({ productId, quantity }));
-        setQuantity(1); // Reset quantity after adding to cart
+        setQuantity(1);
     };
 
     const handleIncreaseQuantity = () => {
@@ -35,198 +35,219 @@ const ProductCard = ({ product }) => {
 
     const isOutOfStock = product.stock === 0 || !product.isActive;
 
+    // Function to truncate product name responsively
+    const truncateName = (name, maxLength = 45) => {
+        if (!name) return '';
+        if (name.length <= maxLength) return name;
+        return name.substring(0, maxLength).trim() + '...';
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -5 }}
+            whileHover={{ y: -3 }}
             transition={{
-                initial: { duration: 0.5 },
+                initial: { duration: 0.4 },
                 hover: { duration: 0.2 },
             }}
-            className="group"
+            className="group w-full max-w-xs mx-auto"
         >
-            <Card className="flex flex-col h-full bg-gradient-to-br from-white via-gray-50 to-white border-0 shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden relative">
-                {/* Floating discount badge */}
+            <Card className="flex flex-col h-full bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden relative rounded-xl">
+                {/* Discount Badge */}
                 {product.discount > 0 && (
                     <motion.div
                         initial={{ scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
-                        transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
-                        className="absolute top-3 right-3 z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg"
+                        transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                        className="absolute top-2 right-2 z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md"
                     >
                         -{product.discount}%
                     </motion.div>
                 )}
 
+                {/* Stock Badge */}
+                <div className="absolute top-2 left-2 z-10">
+                    <span
+                        className={`text-xs px-2 py-1 rounded-full font-medium shadow-sm ${product.stock > 10
+                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                : product.stock > 0
+                                    ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                                    : 'bg-red-100 text-red-700 border border-red-200'
+                            }`}
+                    >
+                        {product.stock > 10 ? 'In Stock' : product.stock > 0 ? `${product.stock} left` : 'Out of Stock'}
+                    </span>
+                </div>
+
+                {/* Image Section */}
                 <CardHeader className="p-0 relative overflow-hidden">
                     <motion.div
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={{ scale: 1.03 }}
                         transition={{ duration: 0.3 }}
                         className="relative group"
                     >
-                        <div >
-                            <div className="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
-                                <img
-                                    src={product.images[0] || "https://via.placeholder.com/300"}
-                                    alt={product.name}
-                                    className="max-w-full max-h-full object-contain"
-                                />
-                            </div>
-                            <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+                        <div className="w-full h-36 sm:h-40 md:h-44 bg-gray-50 flex items-center justify-center overflow-hidden">
+                            <img
+                                src={product.images[0] || "https://via.placeholder.com/300"}
+                                alt={product.name}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                            />
                         </div>
+                        <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
 
-                        {/* Quick view button */}
+                        {/* Quick View Button */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             whileHover={{ opacity: 1, scale: 1 }}
                             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300"
                         >
-                            <Button size="sm" variant="secondary" className="rounded-full shadow-lg backdrop-blur-sm bg-white/90">
-                                <Eye className="h-4 w-4" />
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                className="rounded-full shadow-lg backdrop-blur-sm bg-white/95 hover:bg-white border-0 h-8 w-8 p-0"
+                            >
+                                <Eye className="h-3 w-3" />
                             </Button>
                         </motion.div>
                     </motion.div>
                 </CardHeader>
 
-                <CardContent className="flex-1 p-4 flex flex-col justify-between">
+                {/* Content Section */}
+                <CardContent className="flex-1 p-3 sm:p-4 flex flex-col">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="flex-1 flex flex-col justify-between"
+                        transition={{ delay: 0.1 }}
+                        className="flex-1 flex flex-col"
                     >
-                        <CardTitle className="text-base font-semibold mb-2 h-12 flex flex-col items-start">
-                            {product.stock && (
-                                <span
-                                    className={`text-xs px-2 py-1 rounded-full font-medium ${product.stock > 10
-                                        ? 'bg-green-100 text-green-800'
-                                        : product.stock > 0
-                                            ? 'bg-yellow-100 text-yellow-800'
-                                            : 'bg-red-100 text-red-800'
-                                        }`}
-                                >
-                                    {product.stock > 10 ? 'In Stock' : product.stock > 0 ? `${product.stock} left` : 'Out of Stock'}
-                                </span>
-                            )}
+                        {/* Product Name */}
+                        <CardTitle className="mb-2">
                             <Link to={`/product/${product._id}`}>
-                                <div
-                                    className="hover:text-primary transition-colors duration-200 hover:underline decoration-2 underline-offset-2 line-clamp-2"
-                                >
-                                    {product.name}
-                                </div>
+                                <h3 className="text-sm sm:text-base font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200 leading-tight">
+                                    <span className="block sm:hidden">
+                                        {truncateName(product.name, 30)}
+                                    </span>
+                                    <span className="hidden sm:block md:hidden">
+                                        {truncateName(product.name, 40)}
+                                    </span>
+                                    <span className="hidden md:block">
+                                        {truncateName(product.name, 45)}
+                                    </span>
+                                </h3>
                             </Link>
-
                         </CardTitle>
 
+                        {/* Rating */}
                         <motion.div
-                            className="flex items-center justify-between mb-3"
-                            initial={{ x: -20, opacity: 0 }}
+                            className="flex items-center gap-1 mb-3"
+                            initial={{ x: -10, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
+                            transition={{ delay: 0.2 }}
                         >
-                            <div className="flex items-center">
+                            <div className="flex">
                                 {[...Array(5)].map((_, i) => (
                                     <motion.div
                                         key={i}
                                         initial={{ opacity: 0, rotate: -180 }}
                                         animate={{ opacity: 1, rotate: 0 }}
-                                        transition={{ delay: 0.4 + i * 0.1 }}
+                                        transition={{ delay: 0.3 + i * 0.05 }}
                                     >
                                         <Star
-                                            className={`h-4 w-4 ${i < Math.floor(product.rating || 0)
-                                                ? "text-yellow-400 fill-yellow-400"
-                                                : "text-gray-300"
+                                            className={`h-3 w-3 sm:h-4 sm:w-4 ${i < Math.floor(product.rating || 0)
+                                                    ? "text-yellow-400 fill-yellow-400"
+                                                    : "text-gray-200"
                                                 }`}
                                         />
                                     </motion.div>
                                 ))}
-                                <span className="ml-2 text-sm text-gray-600 font-medium">
-                                    ({(product.rating || 0).toFixed(1)})
-                                </span>
                             </div>
+                            <span className="ml-1 text-xs sm:text-sm text-gray-500 font-medium">
+                                ({(product.rating || 0).toFixed(1)})
+                            </span>
                         </motion.div>
 
+                        {/* Price */}
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                            className="flex items-center justify-between mt-auto"
+                            transition={{ delay: 0.3 }}
+                            className="flex items-center gap-2 mt-auto"
                         >
-                            <div className="flex items-center gap-3">
-                                <p className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                                    ${(product.price || 0).toFixed(2)}
+                            <p className="text-lg sm:text-xl font-bold text-gray-900">
+                                ${(product.price || 0).toFixed(2)}
+                            </p>
+                            {originalPrice && originalPrice > product.price && (
+                                <p className="text-xs sm:text-sm text-gray-400 line-through">
+                                    ${originalPrice.toFixed(2)}
                                 </p>
-                                {originalPrice && originalPrice > product.price && (
-                                    <p className="text-sm text-gray-500 line-through">
-                                        ${originalPrice.toFixed(2)}
-                                    </p>
-                                )}
-                            </div>
+                            )}
                         </motion.div>
                     </motion.div>
                 </CardContent>
 
-                <CardFooter className="p-3 sm:p-4 lg:p-5 pt-0">
+                {/* Footer Section */}
+                <CardFooter className="p-3 sm:p-4 pt-0 space-y-2">
                     <motion.div
-                        className="w-full flex flex-col items-center gap-2"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        className="w-full flex flex-col gap-2"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                     >
                         {/* Quantity Selector */}
-                        <div className="flex items-center border border-gray-200 rounded-md">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleDecreaseQuantity}
-                                disabled={quantity === 1 || isOutOfStock}
-                                className="h-8 w-8 rounded-none hover:bg-gray-100"
-                            >
-                                <Minus className="h-4 w-4" />
-                            </Button>
-                            <span className="text-sm font-medium w-10 text-center">
-                                {quantity}
-                            </span>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleIncreaseQuantity}
-                                disabled={quantity >= product.stock || isOutOfStock}
-                                className="h-8 w-8 rounded-none hover:bg-gray-100"
-                            >
-                                <Plus className="h-4 w-4" />
-                            </Button>
+                        <div className="flex items-center justify-center">
+                            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleDecreaseQuantity}
+                                    disabled={quantity === 1 || isOutOfStock}
+                                    className="h-7 w-7 sm:h-8 sm:w-8 rounded-none hover:bg-gray-50 p-0"
+                                >
+                                    <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
+                                </Button>
+                                <span className="text-sm font-medium w-8 sm:w-10 text-center bg-gray-50 h-7 sm:h-8 flex items-center justify-center">
+                                    {quantity}
+                                </span>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleIncreaseQuantity}
+                                    disabled={quantity >= product.stock || isOutOfStock}
+                                    className="h-7 w-7 sm:h-8 sm:w-8 rounded-none hover:bg-gray-50 p-0"
+                                >
+                                    <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                                </Button>
+                            </div>
                         </div>
 
                         {/* Add to Cart Button */}
                         <Button
                             onClick={handleAddToCart}
-                            className={`flex-1 transition-all duration-300 text-sm sm:text-base font-semibold py-2 sm:py-3 rounded-lg shadow-lg hover:shadow-xl ${isOutOfStock
-                                ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white transform hover:-translate-y-0.5'
+                            className={`w-full transition-all duration-300 text-xs sm:text-sm font-semibold py-2 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md ${isOutOfStock
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                                    : 'bg-blue-600 hover:bg-blue-700 text-white transform hover:-translate-y-0.5 active:translate-y-0'
                                 }`}
                             disabled={isOutOfStock}
                         >
                             <motion.div
-                                className="flex items-center justify-center space-x-2"
-                                whileHover={{ scale: isOutOfStock ? 1 : 1.05 }}
+                                className="flex items-center justify-center gap-1.5 sm:gap-2"
+                                whileHover={{ scale: isOutOfStock ? 1 : 1.02 }}
                             >
-                                {!isOutOfStock && <ShoppingCart className="h-4 w-4" />}
+                                {!isOutOfStock && <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4" />}
                                 <span>{isOutOfStock ? "Out of Stock" : "Add to Cart"}</span>
                             </motion.div>
                         </Button>
                     </motion.div>
                 </CardFooter>
 
-                {/* Hover overlay effect */}
+                {/* Hover Overlay Effect */}
                 <motion.div
-                    className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    className="absolute inset-0 bg-gradient-to-br from-blue-500/3 via-transparent to-blue-500/3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl"
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
                 />
             </Card>
-
-
         </motion.div>
     );
 };

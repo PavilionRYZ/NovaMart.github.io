@@ -82,6 +82,7 @@ export const verifySeller = (req, res, next) => {
       );
     }
     if (req.user.role !== "seller" && req.user.role !== "admin") {
+      console.log(req.user.role)
       return next(
         new ErrorHandler("Unauthorized: Seller or admin access required", 403)
       );

@@ -234,6 +234,17 @@ const Navbar = () => {
                                             </DropdownMenuItem>
                                         </>
                                     )}
+                                    {user?.role === "seller" && (
+                                        <>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem asChild>
+                                                <Link to="/seller-dashboard" className="w-full flex items-center">
+                                                    <Settings className="mr-2 h-4 w-4" />
+                                                    Seller Dashboard
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         onClick={handleLogout}
@@ -375,6 +386,16 @@ const Navbar = () => {
                                                     >
                                                         <Settings className="mr-3 h-5 w-5" />
                                                         Admin Dashboard
+                                                    </Link>
+                                                )}
+                                                {user?.role === "seller" && (
+                                                    <Link
+                                                        to="/seller-dashboard"
+                                                        onClick={() => setIsMobileMenuOpen(false)}
+                                                        className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                                                    >
+                                                        <Settings className="mr-3 h-5 w-5" />
+                                                        Seller Dashboard
                                                     </Link>
                                                 )}
                                             </div>

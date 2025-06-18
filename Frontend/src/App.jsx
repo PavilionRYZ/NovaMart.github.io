@@ -10,7 +10,7 @@ import ProtectedRoute from './lib/ProtectedRoute';
 import SignUpPage from './components/pages/authPages/SignUpPage';
 import OtpVerificationPage from './components/pages/authPages/OtpVerificationPage';
 import SearchPage from './components/pages/SearchPage';
-import UserProfile from './components/pages/userPages/userProfile';
+import UserProfile from './components/pages/userPages/UserProfile';
 import UpdateProfile from './components/pages/userPages/UpdateProfile';
 import UpdatePassword from './components/pages/userPages/UpdatePassword';
 import UserAddress from './components/pages/userPages/UserAddress';
@@ -21,6 +21,11 @@ import Cart from './components/pages/orderPages/Cart';
 import AddressSelection from './components/pages/orderPages/AddressSection';
 import Payment from './components/pages/orderPages/Payment';
 import ProductDetails from './components/pages/productPages/ProductDetails';
+import SellerDashboard from './components/pages/sellerPages/SellerDashboard';
+import Orders from './components/pages/sellerPages/Orders';
+import EditProduct from './components/pages/sellerPages/EditProduct';
+import Products from './components/pages/sellerPages/Products';
+import CreateProduct from './components/pages/sellerPages/CreateProduct';
 
 const App = () => {
   const { isLoading } = useSelector((state) => state.auth);
@@ -145,6 +150,50 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+
+                {/* seller route */}
+                <Route
+                  path="/seller-dashboard"
+                  element={
+                    <ProtectedRoute forAuth={false} roles={['seller', 'admin']}>
+                      <SellerDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/seller-dashboard/orders"
+                  element={
+                    <ProtectedRoute forAuth={false} roles={['seller', 'admin']}>
+                      <Orders />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/seller-dashboard/products"
+                  element={
+                    <ProtectedRoute forAuth={false} roles={['seller', 'admin']}>
+                      <Products />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/seller-dashboard/products/create"
+                  element={
+                    <ProtectedRoute forAuth={false} roles={['seller', 'admin']}>
+                      <CreateProduct />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/seller-dashboard/products/edit/:id"
+                  element={
+                    <ProtectedRoute forAuth={false} roles={['seller', 'admin']}>
+                      <EditProduct />
+                    </ProtectedRoute>
+                  }
+                />
+
+
                 <Route path="*" element={<PageNotFound />} />
               </Routes>
             </main>

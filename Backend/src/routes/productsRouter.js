@@ -23,9 +23,9 @@ router
 router
   .route("/product/delete/:id")
   .delete(verifyToken, verifySeller, deleteProduct);
-router.route("/product/get/:id").get(getProductById);
 router
   .route("/product/get/seller")
   .get(verifyToken, verifySeller, getSellerProducts);
+  router.route("/product/get/:id").get(getProductById);
 
 export default router;
