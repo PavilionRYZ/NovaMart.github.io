@@ -17,12 +17,15 @@ import {
     SheetTrigger,
 } from "../ui/sheet";
 import { Menu, Search, ShoppingCart, User, LogOut, UserCircle, Package, Settings } from "lucide-react";
+import { MdAdminPanelSettings } from "react-icons/md";
+import { MdSell } from "react-icons/md";
 import { clearAuthState, logout } from "../../redux/slices/authSlice";
 import { getCart } from "../../redux/slices/cartSlice";
-import { getProducts } from "../../redux/slices/productSlice";
+// import { getProducts } from "../../redux/slices/productSlice";
 import Loading from "../loading/Loading";
 import { clearAddressState } from "../../redux/slices/addressSlice";
 import { clearOrderState } from "../../redux/slices/orderSlice";
+import { clearAdminState } from "../../redux/slices/adminSlice";
 
 const Navbar = () => {
     const dispatch = useDispatch();
@@ -30,8 +33,6 @@ const Navbar = () => {
     const { isAuthenticated, user, isLoading: authLoading } = useSelector((state) => state.auth);
     const { cart, isLoading: cartLoading } = useSelector((state) => state.cart);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    // const [searchQuery, setSearchQuery] = useState("");
-    // const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     // Calculate cart item count
     const cartItemCount = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
@@ -49,47 +50,13 @@ const Navbar = () => {
             dispatch(clearAuthState());
             dispatch(clearAddressState());
             dispatch(clearOrderState());
+            dispatch(clearAdminState());
             setIsMobileMenuOpen(false);
             navigate('/');
         } catch (error) {
             console.error('Logout failed:', error);
         }
     };
-
-    // const debouncedSearch = useCallback(
-    //     ((func, wait) => {
-    //         let timeout;
-    //         return function executedFunction(...args) {
-    //             const later = () => {
-    //                 clearTimeout(timeout);
-    //                 func(...args);
-    //             };
-    //             clearTimeout(timeout);
-    //             timeout = setTimeout(later, wait);
-    //         };
-    //     })((query) => {
-    //         if (query.trim()) {
-    //             dispatch(getProducts({ search: query, page: 1 }));
-    //             navigate(`/search?q=${encodeURIComponent(query)}`);
-    //         }
-    //     }, 500),
-    //     [dispatch, navigate]
-    // );
-
-    // const handleSearchChange = (e) => {
-    //     const query = e.target.value;
-    //     setSearchQuery(query);
-    //     debouncedSearch(query);
-    // };
-
-    // const handleSearchSubmit = (e) => {
-    //     e.preventDefault();
-    //     if (searchQuery.trim()) {
-    //         dispatch(getProducts({ search: searchQuery.trim(), page: 1 }));
-    //         navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    //         setSearchQuery("");
-    //     }
-    // };
 
     const navItems = [
         { name: "Home", path: "/" },
@@ -112,31 +79,6 @@ const Navbar = () => {
                             NovaMart
                         </Link>
                     </div>
-
-                    {/* Search Bar (Hidden on small screens) */}
-                    {/* <form
-                        onSubmit={handleSearchSubmit}
-                        className="hidden md:flex flex-1 mx-6 lg:mx-8 max-w-2xl"
-                    >
-                        <div className="relative w-full group">
-                            <Input
-                                type="text"
-                                placeholder="Search for products, brands, and more..."
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                className={`pr-12 h-11 border-2 transition-all duration-300 ${isSearchFocused
-                                    ? 'border-blue-500 shadow-lg ring-4 ring-blue-100'
-                                    : 'border-gray-200 hover:border-gray-300'
-                                    } rounded-full bg-gray-50 focus:bg-white`}
-                            />
-                            <button
-                                type="submit"
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-full hover:bg-blue-100 transition-colors duration-200"
-                            >
-                                <Search className="h-5 w-5 text-gray-500 group-hover:text-blue-600" />
-                            </button>
-                        </div>
-                    </form> */}
 
                     {/* Desktop Menu */}
                     <div className="hidden lg:flex items-center space-x-6">
@@ -227,9 +169,15 @@ const Navbar = () => {
                                         <>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem asChild>
-                                                <Link to="/admin" className="w-full flex items-center">
-                                                    <Settings className="mr-2 h-4 w-4" />
+                                                <Link to="/admin-dashboard" className="w-full flex items-center">
+                                                    <MdAdminPanelSettings  className="mr-2 h-4 w-4" />
                                                     Admin Dashboard
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem asChild>
+                                                <Link to="/seller-dashboard" className="w-full flex items-center">
+                                                    <MdSell className="mr-2 h-4 w-4" />
+                                                    Seller Dashboard
                                                 </Link>
                                             </DropdownMenuItem>
                                         </>
@@ -325,21 +273,6 @@ const Navbar = () => {
 
                                     {/* Mobile Content */}
                                     <div className="flex-1 p-6 space-y-4">
-                                        {/* Mobile Search */}
-                                        {/* <form onSubmit={handleSearchSubmit} className="flex space-x-2">
-
-                                            <Input
-                                                type="text"
-                                                placeholder="Search products..."
-                                                value={searchQuery}
-                                                onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="flex-1 rounded-full border-2 border-gray-200 focus:border-blue-500"
-                                            />
-                                            <Button type="submit" size="icon" className="rounded-full">
-                                                <Search className="h-5 w-5" />
-                                            </Button>
-                                        </form> */}
-
                                         {/* Mobile Navigation */}
                                         <div className="space-y-2">
                                             {navItems.map((item) => (
@@ -379,14 +312,24 @@ const Navbar = () => {
                                                     Orders
                                                 </Link>
                                                 {user?.role === "admin" && (
-                                                    <Link
-                                                        to="/admin"
-                                                        onClick={() => setIsMobileMenuOpen(false)}
-                                                        className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
-                                                    >
-                                                        <Settings className="mr-3 h-5 w-5" />
-                                                        Admin Dashboard
-                                                    </Link>
+                                                    <>
+                                                        <Link
+                                                            to="/admin-dashboard"
+                                                            onClick={() => setIsMobileMenuOpen(false)}
+                                                            className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                                                        >
+                                                            <MdAdminPanelSettings  className="mr-3 h-5 w-5" />
+                                                            Admin Dashboard
+                                                        </Link>
+                                                        <Link
+                                                            to="/seller-dashboard"
+                                                            onClick={() => setIsMobileMenuOpen(false)}
+                                                            className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
+                                                        >
+                                                            <MdSell className="mr-3 h-5 w-5" />
+                                                            Seller Dashboard
+                                                        </Link>
+                                                    </>
                                                 )}
                                                 {user?.role === "seller" && (
                                                     <Link
@@ -394,7 +337,7 @@ const Navbar = () => {
                                                         onClick={() => setIsMobileMenuOpen(false)}
                                                         className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
                                                     >
-                                                        <Settings className="mr-3 h-5 w-5" />
+                                                        <MdSell className="mr-3 h-5 w-5" />
                                                         Seller Dashboard
                                                     </Link>
                                                 )}

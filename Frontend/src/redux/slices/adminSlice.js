@@ -1,9 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-axios.defaults.withCredentials = true;
-
 const API_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
+
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Cookie = `token=${token}`;
+  }
+  return config;
+});
 
 const initialState = {
   users: [],
@@ -18,12 +29,22 @@ export const getAllUsers = createAsyncThunk(
   "admin/getAllUsers",
   async (queryParams = {}, { rejectWithValue }) => {
     try {
-      const params = new URLSearchParams(queryParams).toString();
-      const response = await axios.get(
-        `${API_URL}/admin/users/get/all?${params}`
+      // console.log("Sending request with params:", queryParams);
+      const validParams = Object.fromEntries(
+        Object.entries(queryParams).filter(
+          ([key, value]) =>
+            value !== "" && value !== undefined && value !== null
+        )
       );
-      return response.data.data;
+      // console.log("Valid params:", validParams);
+      const params = new URLSearchParams(validParams).toString();
+      const url = `${API_URL}/admin/users/get/all${params ? `?${params}` : ""}`;
+      // console.log("Request URL:", url);
+      const response = await axiosInstance.get(url);
+      // console.log("Response data:", response.data);
+      return response.data.data; 
     } catch (error) {
+      console.error("Error response:", error.response?.data || error.message);
       return rejectWithValue(
         error.response?.data?.message || "Failed to get all users"
       );
@@ -36,7 +57,7 @@ export const changeUserRole = createAsyncThunk(
   "admin/changeUserRole",
   async ({ id, newRole }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${API_URL}/admin/user/role/change/${id}`,
         { newRole }
       );
@@ -54,7 +75,7 @@ export const deleteUser = createAsyncThunk(
   "admin/deleteUser",
   async ({ id }, { rejectWithValue }) => {
     try {
-      await axios.delete(`${API_URL}/admin/user/delete/${id}`);
+      await axiosInstance.delete(`${API_URL}/admin/user/delete/${id}`);
       return { id };
     } catch (error) {
       return rejectWithValue(

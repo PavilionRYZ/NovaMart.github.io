@@ -27,6 +27,8 @@ import Orders from './components/pages/sellerPages/Orders';
 import EditProduct from './components/pages/sellerPages/EditProduct';
 import Products from './components/pages/sellerPages/Products';
 import CreateProduct from './components/pages/sellerPages/CreateProduct';
+import AdminDashboard from './components/pages/adminPages/AdminDashboard';
+
 
 const App = () => {
   const { isLoading } = useSelector((state) => state.auth);
@@ -194,6 +196,15 @@ const App = () => {
                   }
                 />
 
+                {/* admin route */}
+                <Route
+                  path="/admin-dashboard"
+                  element={
+                    <ProtectedRoute forAuth={false} roles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
                 <Route path="*" element={<PageNotFound />} />
               </Routes>
