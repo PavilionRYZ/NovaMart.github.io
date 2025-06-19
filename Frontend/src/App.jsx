@@ -9,6 +9,8 @@ import HomePage from './components/pages/HomePage';
 import SignInPage from './components/pages/authPages/SingInPage';
 import ProtectedRoute from './lib/ProtectedRoute';
 import SignUpPage from './components/pages/authPages/SignUpPage';
+import ForgotPassword from './components/pages/authPages/ForgotPassword';
+import ResetPassword from './components/pages/authPages/ResetPassword';
 import OtpVerificationPage from './components/pages/authPages/OtpVerificationPage';
 import SearchPage from './components/pages/SearchPage';
 import UserProfile from './components/pages/userPages/UserProfile';
@@ -41,6 +43,7 @@ const App = () => {
             <main>
               <Routes>
                 <Route path='/' element={<HomePage />} />
+                {/* auth route  */}
                 <Route
                   path="/signin"
                   element={
@@ -65,6 +68,23 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/forgot-password"
+                  element={
+                    <ProtectedRoute forAuth={true}>
+                      <ForgotPassword />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/reset-password/:token"
+                  element={
+                    <ProtectedRoute forAuth={true}>
+                      <ResetPassword />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* user route  */}
                 <Route
                   path="/profile"
                   element={
@@ -140,17 +160,13 @@ const App = () => {
                 <Route
                   path="/search"
                   element={
-                    <ProtectedRoute forAuth={false}>
-                      <SearchPage />
-                    </ProtectedRoute>
+                    <SearchPage />
                   }
                 />
                 <Route
                   path="/product/:id"
                   element={
-                    <ProtectedRoute forAuth={false}>
-                      <ProductDetails />
-                    </ProtectedRoute>
+                    <ProductDetails />
                   }
                 />
 

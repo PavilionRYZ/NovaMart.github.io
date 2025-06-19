@@ -69,22 +69,6 @@ export const deleteReview = createAsyncThunk(
   }
 );
 
-export const getProductReviews = createAsyncThunk(
-  "review/getProductReviews",
-  async ({ id }, { rejectWithValue }) => {
-    try {
-      const response = await publicAxios.get(
-        `${API_URL}/product/reviews/get/${id}`
-      );
-      return response.data.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Failed to get product reviews"
-      );
-    }
-  }
-);
-
 export const getReviewById = createAsyncThunk(
   "review/getReviewById",
   async ({ id }, { rejectWithValue }) => {
@@ -110,6 +94,22 @@ export const replyReview = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to reply to review"
+      );
+    }
+  }
+);
+
+export const getProductReviews = createAsyncThunk(
+  "review/getProductReviews",
+  async ({ id }, { rejectWithValue }) => {
+    try {
+      const response = await publicAxios.get(
+        `${API_URL}/product/reviews/get/${id}`
+      );
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to get product reviews"
       );
     }
   }

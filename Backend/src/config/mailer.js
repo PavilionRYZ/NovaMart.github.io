@@ -145,7 +145,7 @@ const sendOtpEmail = async (email, otp) => {
 // Function to send password reset email with token link
 const sendResetPasswordEmail = async (email, token) => {
   const resetUrl = `${
-    process.env.FRONTEND_BASE_URL || "http://localhost:5173"
+    process.env.FRONTEND_BASE_URL || "http://localhost:3050"
   }/reset-password/${token}`;
 
   const content = `
