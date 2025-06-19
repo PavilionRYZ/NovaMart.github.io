@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { Routes, Route } from 'react-router-dom';
 import Loading from "./components/loading/Loading";
 import Navbar from './components/layout/Navbar';
+import Footer from './components/layout/Footer';
 import ErrorBoundary from './lib/ErrorBoundary';
 import HomePage from './components/pages/HomePage';
 import SignInPage from './components/pages/authPages/SingInPage';
@@ -198,6 +199,7 @@ const App = () => {
               </Routes>
             </main>
           </ErrorBoundary>
+          <Footer />
         </div>
       )}
     </Fragment>

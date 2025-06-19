@@ -1,4 +1,4 @@
-import React,{ useEffect, useState, useRef, useMemo } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { getProducts, clearProductState } from "../../redux/slices/productSlice";
@@ -8,7 +8,7 @@ import { Skeleton } from "../ui/skeleton";
 import { ChevronLeft, ChevronRight, Sparkles, TrendingUp, Star, Zap, Tag, Gift, ShoppingBag } from "lucide-react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-
+import Loading from "../loading/Loading";
 
 const carouselImages = [
   {
@@ -49,16 +49,13 @@ const offerBanners = [
   },
   {
     title: "Flash Sale",
-    subtitle: "Grab Deals Before They’re Gone!",
+    subtitle: "Grab Deals Before They're Gone!",
     image: "https://images.unsplash.com/photo-1580828343064-fde4fc206bc6?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     cta: "Shop Deals",
-    link: "/deals/flash-sale  ",
+    link: "/deals/flash-sale",
     gradient: "from-blue-500 to-purple-600",
   },
 ];
-
-
-const MemoizedProductCard = React.memo(ProductCard);
 
 const HomePage = () => {
   const dispatch = useDispatch();
@@ -70,16 +67,15 @@ const HomePage = () => {
   const shouldReduceMotion = useReducedMotion();
 
 
-  const memoizedProducts = useMemo(() => Array.isArray(products) ? products : [], [products]);
+  const displayProducts = Array.isArray(products) ? products : [];
 
   useEffect(() => {
     isMounted.current = true;
-    dispatch(clearProductState());
     const fetchProducts = async () => {
       try {
         console.log("Dispatching getProducts with limit: 12");
-        await dispatch(getProducts({ limit: 12 })).unwrap();
-        console.log("getProducts succeeded");
+        const result = await dispatch(getProducts({ limit: 12 })).unwrap();
+        console.log("getProducts succeeded, received:", result);
       } catch (err) {
         if (isMounted.current) {
           console.error("getProducts failed with error:", err);
@@ -96,13 +92,6 @@ const HomePage = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    console.log("Products state updated:", { products: memoizedProducts, isLoading, error });
-    if (error && !isLoading) {
-      toast.error(error);
-    }
-  }, [memoizedProducts, isLoading, error]);
-
-  useEffect(() => {
     if (!isHovered && isMounted.current) {
       const interval = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
@@ -110,6 +99,17 @@ const HomePage = () => {
       return () => clearInterval(interval);
     }
   }, [isHovered]);
+
+  const handleRetry = async () => {
+    setRetryLoading(true);
+    try {
+      await dispatch(getProducts({ limit: 12 })).unwrap();
+    } catch (err) {
+      toast.error(err || "Retry failed");
+    } finally {
+      setRetryLoading(false);
+    }
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -143,16 +143,9 @@ const HomePage = () => {
     }),
   };
 
-  const handleRetry = async () => {
-    setRetryLoading(true);
-    try {
-      await dispatch(getProducts({ limit: 12 })).unwrap();
-    } catch (err) {
-      toast.error(err || "Retry failed");
-    } finally {
-      setRetryLoading(false);
-    }
-  };
+  console.log("Display products:", displayProducts);
+  console.log("Is loading:", isLoading);
+  console.log("Error:", error);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
@@ -337,136 +330,6 @@ const HomePage = () => {
         </div>
       </motion.div>
 
-      {/* Trending Deals */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
-        <motion.div
-          className="text-center mb-10 sm:mb-16"
-          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: shouldReduceMotion ? 0 : 0.8 }}
-        >
-          <h2 className="text-3xl sm:text-5xl font-black text-gray-900 mb-4 sm:mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text">
-            Trending Deals
-          </h2>
-          <motion.div
-            className="w-24 sm:w-32 h-1 sm:h-1.5 bg-gradient-to-r from-violet-600 via-purple-600 to-blue-600 mx-auto mb-6 sm:mb-8 rounded-full"
-            initial={{ width: 0 }}
-            whileInView={{ width: 96 }}
-            viewport={{ once: true }}
-            transition={{ duration: shouldReduceMotion ? 0 : 1 }}
-          />
-          <p className="text-base sm:text-xl text-gray-600 max-w-2xl sm:max-w-3xl mx-auto leading-relaxed">
-            Don’t miss out on these hot deals and exclusive offers
-          </p>
-        </motion.div>
-
-        {isLoading || retryLoading ? (
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {[...Array(4)].map((_, i) => (
-              <motion.div key={i} variants={itemVariants} className="space-y-4">
-                <Skeleton className="h-60 sm:h-72 w-full rounded-2xl" />
-                <Skeleton className="h-3 sm:h-4 w-3/4 rounded-lg" />
-                <Skeleton className="h-3 sm:h-4 w-1/2 rounded-lg" />
-                <Skeleton className="h-10 sm:h-12 w-full rounded-xl" />
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : error ? (
-          <motion.div
-            className="text-center py-16 sm:py-20"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.5 }}
-          >
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-8 sm:p-12 max-w-md mx-auto shadow-lg">
-              <motion.div
-                className="text-red-600 mb-4 sm:mb-6"
-                animate={{ rotate: shouldReduceMotion ? 0 : [0, 10, -10, 0] }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
-              >
-                <svg
-                  className="h-12 w-12 sm:h-16 sm:w-16 mx-auto"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.732 15.5c-.77.833.192 2.5 1.732 2.5z"
-                  />
-                </svg>
-              </motion.div>
-              <h3 className="text-lg sm:text-xl font-bold text-red-800 mb-2 sm:mb-3">Something went wrong</h3>
-              <p className="text-red-600 mb-4 sm:mb-6">{error}</p>
-              <Button
-                onClick={handleRetry}
-                className="bg-red-600 hover:bg-red-700 font-semibold"
-                disabled={retryLoading}
-              >
-                {retryLoading ? "Retrying..." : "Try Again"}
-              </Button>
-            </div>
-          </motion.div>
-        ) : memoizedProducts.length === 0 ? (
-          <motion.div
-            className="text-center py-16 sm:py-20"
-            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.6 }}
-          >
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 sm:p-12 max-w-md mx-auto shadow-lg">
-              <motion.div
-                className="text-gray-500 mb-4 sm:mb-6"
-                animate={{ y: shouldReduceMotion ? 0 : [0, -10, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <svg
-                  className="h-12 w-12 sm:h-16 sm:w-16 mx-auto"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
-              </motion.div>
-              <h3 className="text-lg sm:text-xl font-bold text-gray-700 mb-2 sm:mb-3">No products available</h3>
-              <p className="text-gray-500">Check back later for new arrivals</p>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
-            {memoizedProducts.slice(0, 8).map((product) => (
-              <motion.div
-                key={product._id}
-                variants={itemVariants}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <MemoizedProductCard product={product} />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </div>
-
       {/* Featured Products */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
         <motion.div
@@ -491,7 +354,8 @@ const HomePage = () => {
           </p>
         </motion.div>
 
-        {isLoading || retryLoading ? (
+        {/* Show loading skeletons */}
+        {(isLoading || retryLoading) && (
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8"
             variants={containerVariants}
@@ -507,7 +371,10 @@ const HomePage = () => {
               </motion.div>
             ))}
           </motion.div>
-        ) : error ? (
+        )}
+
+        {/* Show error state */}
+        {!isLoading && !retryLoading && error && (
           <motion.div
             className="text-center py-16 sm:py-20"
             initial={{ opacity: 0, scale: 0.9 }}
@@ -545,7 +412,10 @@ const HomePage = () => {
               </Button>
             </div>
           </motion.div>
-        ) : memoizedProducts.length === 0 ? (
+        )}
+
+        {/* Show empty state */}
+        {!isLoading && !retryLoading && !error && displayProducts.length === 0 && (
           <motion.div
             className="text-center py-16 sm:py-20"
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
@@ -576,7 +446,10 @@ const HomePage = () => {
               <p className="text-gray-500">Check back later for new arrivals</p>
             </div>
           </motion.div>
-        ) : (
+        )}
+
+        {/* Show products when available */}
+        {!isLoading && !retryLoading && !error && displayProducts.length > 0 && (
           <motion.div
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
             variants={containerVariants}
@@ -584,13 +457,13 @@ const HomePage = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
           >
-            {memoizedProducts.map((product) => (
+            {displayProducts.map((product, index) => (
               <motion.div
-                key={product._id}
+                key={product._id || index}
                 variants={itemVariants}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <MemoizedProductCard product={product} />
+                <ProductCard product={product} />
               </motion.div>
             ))}
           </motion.div>
@@ -608,7 +481,7 @@ const HomePage = () => {
             transition={{ duration: shouldReduceMotion ? 0 : 0.8 }}
           >
             <img
-              src="https://images.unsplash.com/photo-1618375619187-8b2991f7893e?auto=format&fit=crop&w=1200&q=80"
+              src="https://plus.unsplash.com/premium_photo-1682309526815-efe5d6225117?q=80&w=1212&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Join Our Newsletter"
               className="w-full h-48 sm:h-64 lg:h-80 object-cover"
               loading="lazy"

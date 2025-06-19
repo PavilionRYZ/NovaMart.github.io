@@ -35,13 +35,6 @@ const ProductCard = ({ product }) => {
 
     const isOutOfStock = product.stock === 0 || !product.isActive;
 
-    // Function to truncate product name responsively
-    const truncateName = (name, maxLength = 45) => {
-        if (!name) return '';
-        if (name.length <= maxLength) return name;
-        return name.substring(0, maxLength).trim() + '...';
-    };
-
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -51,9 +44,9 @@ const ProductCard = ({ product }) => {
                 initial: { duration: 0.4 },
                 hover: { duration: 0.2 },
             }}
-            className="group w-full max-w-xs mx-auto"
+            className="group w-full"
         >
-            <Card className="flex flex-col h-full bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden relative rounded-xl">
+            <Card className="flex flex-col h-[420px] sm:h-[450px] bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden rounded-xl">
                 {/* Discount Badge */}
                 {product.discount > 0 && (
                     <motion.div
@@ -87,7 +80,7 @@ const ProductCard = ({ product }) => {
                         transition={{ duration: 0.3 }}
                         className="relative group"
                     >
-                        <div className="w-full h-36 sm:h-40 md:h-44 bg-gray-50 flex items-center justify-center overflow-hidden">
+                        <div className="w-full aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
                             <img
                                 src={product.images[0] || "https://via.placeholder.com/300"}
                                 alt={product.name}
@@ -125,16 +118,8 @@ const ProductCard = ({ product }) => {
                         {/* Product Name */}
                         <CardTitle className="mb-2">
                             <Link to={`/product/${product._id}`}>
-                                <h3 className="text-sm sm:text-base font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200 leading-tight">
-                                    <span className="block sm:hidden">
-                                        {truncateName(product.name, 30)}
-                                    </span>
-                                    <span className="hidden sm:block md:hidden">
-                                        {truncateName(product.name, 40)}
-                                    </span>
-                                    <span className="hidden md:block">
-                                        {truncateName(product.name, 45)}
-                                    </span>
+                                <h3 className="text-sm sm:text-base font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+                                    {product.name || 'Unnamed Product'}
                                 </h3>
                             </Link>
                         </CardTitle>
@@ -188,7 +173,7 @@ const ProductCard = ({ product }) => {
                 </CardContent>
 
                 {/* Footer Section */}
-                <CardFooter className="p-3 sm:p-4 pt-0 space-y-2">
+                <CardFooter className="p-3 sm:p-4 pt-0 flex flex-col gap-2">
                     <motion.div
                         className="w-full flex flex-col gap-2"
                         whileHover={{ scale: 1.01 }}
