@@ -31,7 +31,6 @@ const SearchPage = () => {
         page: Number(searchParams.get('page')) || 1,
     });
 
-    // Predefined categories
     const categories = [
         { value: 'all', label: 'All Categories' },
         { value: 'Electronics', label: 'Electronics' },
@@ -41,7 +40,6 @@ const SearchPage = () => {
         { value: 'Beauty', label: 'Beauty' },
     ];
 
-    // Fetch products when filters change
     useEffect(() => {
         const queryFilters = {
             keyword: filters.keyword || undefined,
@@ -54,7 +52,7 @@ const SearchPage = () => {
 
         dispatch(getProducts(queryFilters));
 
-        // Update URL parameters
+
         const params = new URLSearchParams();
         if (filters.keyword) params.set('keyword', filters.keyword);
         if (filters.category !== 'all') params.set('category', filters.category);
@@ -69,7 +67,6 @@ const SearchPage = () => {
     }, [filters, dispatch, setSearchParams]);
 
     const handleFilterChange = (name, value) => {
-        // Prevent negative prices and ensure maxPrice >= minPrice
         if (name === 'minPrice' || name === 'maxPrice') {
             if (value && Number(value) < 0) return;
             if (name === 'maxPrice' && filters.minPrice && Number(value) < Number(filters.minPrice)) return;
@@ -109,15 +106,13 @@ const SearchPage = () => {
         });
     };
 
-    // Determine if product is a "Best Seller"
     const isBestSeller = (product) => (product.reviews?.length || 0) > 50;
 
-    // Ensure searchResults is an array
     const safeSearchResults = Array.isArray(searchResults) ? searchResults : [];
 
     return (
         <div className="min-h-screen bg-gray-100 py-6 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
+            <div className="max-w-screen mx-auto flex flex-col lg:flex-row gap-8">
                 {/* Filters Sidebar */}
                 <div className="lg:w-1/4 bg-white p-6 rounded-lg shadow-md">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Refine By</h2>

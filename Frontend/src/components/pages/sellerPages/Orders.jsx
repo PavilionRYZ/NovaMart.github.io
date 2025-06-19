@@ -13,6 +13,8 @@ import {
   ClockCircleOutlined,
   SendOutlined
 } from '@ant-design/icons';
+import Loading from "../../loading/Loading";
+
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -246,92 +248,94 @@ const Orders = () => {
       }}
       className="xl:ml-64"
     >
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-          <Card
-            title={
-              <Space>
-                <Badge count={orders.length} showZero color="#1890ff">
-                  <ShoppingCartOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
-                </Badge>
-                <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
-                  Orders Management
-                </Title>
-              </Space>
-            }
-            style={{
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-              border: '1px solid #e8e8e8'
-            }}
-            // className="sm:rounded-none sm:border-0 sm:shadow-none"
-            bodyStyle={{ padding: '16px' }}
-            headStyle={{ padding: '0 16px' }}
-            className="sm:m-0 sm:rounded-none [&_.ant-card-head]:border-b [&_.ant-card-head]:border-gray-200 [&_.ant-card-head-title]:py-4 [&_.ant-card-body]:p-3 sm:[&_.ant-card-body]:p-3"
-          >
-            {orders.length === 0 ? (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '40px 20px',
-                  background: '#fafafa',
-                  borderRadius: '8px',
-                  border: '1px dashed #d9d9d9'
-                }}
-              >
-                <ShoppingCartOutlined style={{ fontSize: '48px', color: '#bfbfbf', marginBottom: '16px' }} />
-                <Title level={5} style={{ color: '#595959', margin: '0 0 8px 0' }}>
-                  No orders found
-                </Title>
-                <Text style={{ color: '#8c8c8c' }}>
-                  Orders will appear here when customers place them
-                </Text>
-              </div>
-            ) : (
-              <>
-                {/* Desktop Table */}
-                <div className="hidden md:block">
-                  <Table
-                    columns={columns}
-                    dataSource={orders}
-                    rowKey="_id"
-                    loading={isLoading}
-                    pagination={{
-                      pageSize: 10,
-                      showSizeChanger: false,
-                      showQuickJumper: false,
-                      showTotal: (total, range) =>
-                        `${range[0]}-${range[1]} of ${total} orders`,
-                      style: { textAlign: 'center' }
-                    }}
-                    scroll={{ x: 800 }}
-                    size="middle"
-                    className="[&_.ant-table-thead>tr>th]:bg-gray-50 [&_.ant-table-thead>tr>th]:text-gray-600 [&_.ant-table-thead>tr>th]:font-semibold [&_.ant-table-thead>tr>th]:border-b-2 [&_.ant-table-thead>tr>th]:border-gray-200 [&_.ant-table-thead>tr>th]:px-2 [&_.ant-table-thead>tr>th]:py-3 [&_.ant-table-thead>tr>th]:text-sm [&_.ant-table-tbody>tr>td]:px-2 [&_.ant-table-tbody>tr>td]:py-3 [&_.ant-table-tbody>tr>td]:border-b [&_.ant-table-tbody>tr>td]:border-gray-100 [&_.ant-table-tbody>tr>td]:align-middle [&_.ant-table-tbody>tr:hover>td]:bg-gray-50 [&_.ant-select-selector]:rounded [&_.ant-select-selector]:border [&_.ant-select-selector]:border-gray-300 [&_.ant-select-selector:hover]:border-blue-400"
-                  />
+      {isLoading ? (<Loading />) : (
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+            <Card
+              title={
+                <Space>
+                  <Badge count={orders.length} showZero color="#1890ff">
+                    <ShoppingCartOutlined style={{ fontSize: '20px', color: '#1890ff' }} />
+                  </Badge>
+                  <Title level={4} style={{ margin: 0, color: '#1890ff' }}>
+                    Orders Management
+                  </Title>
+                </Space>
+              }
+              style={{
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #e8e8e8'
+              }}
+              // className="sm:rounded-none sm:border-0 sm:shadow-none"
+              bodyStyle={{ padding: '16px' }}
+              headStyle={{ padding: '0 16px' }}
+              className="sm:m-0 sm:rounded-none [&_.ant-card-head]:border-b [&_.ant-card-head]:border-gray-200 [&_.ant-card-head-title]:py-4 [&_.ant-card-body]:p-3 sm:[&_.ant-card-body]:p-3"
+            >
+              {orders.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: '40px 20px',
+                    background: '#fafafa',
+                    borderRadius: '8px',
+                    border: '1px dashed #d9d9d9'
+                  }}
+                >
+                  <ShoppingCartOutlined style={{ fontSize: '48px', color: '#bfbfbf', marginBottom: '16px' }} />
+                  <Title level={5} style={{ color: '#595959', margin: '0 0 8px 0' }}>
+                    No orders found
+                  </Title>
+                  <Text style={{ color: '#8c8c8c' }}>
+                    Orders will appear here when customers place them
+                  </Text>
                 </div>
+              ) : (
+                <>
+                  {/* Desktop Table */}
+                  <div className="hidden md:block">
+                    <Table
+                      columns={columns}
+                      dataSource={orders}
+                      rowKey="_id"
+                      loading={isLoading}
+                      pagination={{
+                        pageSize: 10,
+                        showSizeChanger: false,
+                        showQuickJumper: false,
+                        showTotal: (total, range) =>
+                          `${range[0]}-${range[1]} of ${total} orders`,
+                        style: { textAlign: 'center' }
+                      }}
+                      scroll={{ x: 800 }}
+                      size="middle"
+                      className="[&_.ant-table-thead>tr>th]:bg-gray-50 [&_.ant-table-thead>tr>th]:text-gray-600 [&_.ant-table-thead>tr>th]:font-semibold [&_.ant-table-thead>tr>th]:border-b-2 [&_.ant-table-thead>tr>th]:border-gray-200 [&_.ant-table-thead>tr>th]:px-2 [&_.ant-table-thead>tr>th]:py-3 [&_.ant-table-thead>tr>th]:text-sm [&_.ant-table-tbody>tr>td]:px-2 [&_.ant-table-tbody>tr>td]:py-3 [&_.ant-table-tbody>tr>td]:border-b [&_.ant-table-tbody>tr>td]:border-gray-100 [&_.ant-table-tbody>tr>td]:align-middle [&_.ant-table-tbody>tr:hover>td]:bg-gray-50 [&_.ant-select-selector]:rounded [&_.ant-select-selector]:border [&_.ant-select-selector]:border-gray-300 [&_.ant-select-selector:hover]:border-blue-400"
+                    />
+                  </div>
 
-                {/* Mobile Table */}
-                <div className="block md:hidden">
-                  <Table
-                    columns={mobileColumns}
-                    dataSource={orders}
-                    rowKey="_id"
-                    loading={isLoading}
-                    pagination={{
-                      pageSize: 5,
-                      showSizeChanger: false,
-                      simple: true
-                    }}
-                    showHeader={false}
-                    size="small"
-                    className="[&_.ant-table-pagination]:text-center [&_.ant-table-pagination]:mt-4 [&_.ant-table-pagination]:mb-0"
-                  />
-                </div>
-              </>
-            )}
-          </Card>
-        </Col>
-      </Row>
+                  {/* Mobile Table */}
+                  <div className="block md:hidden">
+                    <Table
+                      columns={mobileColumns}
+                      dataSource={orders}
+                      rowKey="_id"
+                      loading={isLoading}
+                      pagination={{
+                        pageSize: 5,
+                        showSizeChanger: false,
+                        simple: true
+                      }}
+                      showHeader={false}
+                      size="small"
+                      className="[&_.ant-table-pagination]:text-center [&_.ant-table-pagination]:mt-4 [&_.ant-table-pagination]:mb-0"
+                    />
+                  </div>
+                </>
+              )}
+            </Card>
+          </Col>
+        </Row>
+      )}
     </motion.div>
   );
 };

@@ -9,6 +9,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
 import { Form, Input, Button, Card, Select, Upload, Spin, Row, Col, Typography, Switch, Space, Divider, Alert, Progress } from "antd";
 import { UploadOutlined, SaveOutlined, ArrowLeftOutlined, EditOutlined, ShopOutlined } from "@ant-design/icons";
+import Loading from "../../loading/Loading";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -246,365 +247,367 @@ const EditProduct = () => {
         padding: "40px 32px",
       }}
     >
-      <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Header Section */}
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} style={{ marginBottom: "32px" }}>
-          <Card
-            style={{
-              background: "rgba(255, 255, 255, 0.95)",
-              backdropFilter: "blur(20px)",
-              borderRadius: "16px",
-              border: "none",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-              padding: "24px 32px" 
-            }}
-          >
-            <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
-              <Space align="center">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    type="ghost"
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate("/seller-dashboard/products")}
-                    style={{
-                      border: "1px solid rgba(102, 126, 234, 0.2)",
-                      color: "#667eea",
-                      borderRadius: "12px",
-                      height: "48px",
-                      paddingLeft: "16px",
-                      paddingRight: "16px",
-                    }}
-                  >
-                    Back to Products
-                  </Button>
-                </motion.div>
-                <div style={{ marginLeft: "24px" }}>
-                  <Title
-                    level={2}
-                    style={{
-                      margin: 0,
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                      fontSize: "32px",
-                      fontWeight: "700",
-                    }}
-                  >
-                    <EditOutlined style={{ marginRight: "12px" }} />
-                    Edit Product
-                  </Title>
-                  <Text style={{ fontSize: "16px", color: "#6b7280" }}>Update your product information and details</Text>
-                </div>
-              </Space>
-              <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
-                <ShopOutlined style={{ fontSize: "48px", color: "#667eea", opacity: 0.6 }} />
-              </motion.div>
-            </Space>
-          </Card>
-        </motion.div>
-
-        {/* Main Edit Form */}
-        <motion.div variants={cardVariants}>
-          <Card
-            style={{
-              background: "rgba(255, 255, 255, 0.95)",
-              backdropFilter: "blur(20px)",
-              borderRadius: "24px",
-              border: "none",
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
-            }}
-            bodyStyle={{ padding: "48px" }}
-          >
-            <Spin spinning={isLoading || uploading} size="large">
-              {uploading && uploadProgress > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  style={{ marginBottom: "24px" }}
-                >
-                  <Progress
-                    percent={uploadProgress}
-                    status={uploadProgress === 100 ? "success" : "active"}
-                    strokeColor={{
-                      "0%": "#667eea",
-                      "100%": "#764ba2",
-                    }}
-                    style={{ marginBottom: "8px" }}
-                  />
-                  <Text type="secondary">{uploadProgress < 100 ? "Uploading images..." : "Upload complete!"}</Text>
-                </motion.div>
-              )}
-
-              {uploadError && (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: "24px" }}>
-                  <Alert
-                    message="Upload Error"
-                    description={uploadError}
-                    type="error"
-                    showIcon
-                    closable
-                    onClose={() => setUploadError("")}
-                  />
-                </motion.div>
-              )}
-
-              <Form form={form} layout="vertical" onFinish={onFinish} size="large">
-                {/* Basic Information Section */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                  <Title level={4} style={{ color: "#1a1a1a", marginBottom: "24px", fontSize: "20px", fontWeight: "600" }}>
-                    📝 Basic Information
-                  </Title>
-
-                  <Row gutter={24}>
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        label={<Text strong style={{ fontSize: "16px" }}>Product Name</Text>}
-                        name="name"
-                        rules={[{ required: true, message: "Please enter product name" }]}
-                      >
-                        <Input
-                          placeholder="Enter product name"
-                          style={{
-                            borderRadius: "12px",
-                            border: "1px solid rgba(102, 126, 234, 0.2)",
-                            height: "48px",
-                          }}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        label={<Text strong style={{ fontSize: "16px" }}>Brand</Text>}
-                        name="brand"
-                        rules={[{ required: true, message: "Please enter brand name" }]}
-                      >
-                        <Input
-                          placeholder="Enter brand name"
-                          style={{
-                            borderRadius: "12px",
-                            border: "1px solid rgba(102, 126, 234, 0.2)",
-                            height: "48px",
-                          }}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Form.Item
-                    label={<Text strong style={{ fontSize: "16px" }}>Description</Text>}
-                    name="description"
-                    rules={[{ required: true, message: "Please enter product description" }]}
-                  >
-                    <TextArea
-                      rows={4}
-                      placeholder="Describe your product in detail..."
-                      style={{
-                        borderRadius: "12px",
-                        border: "1px solid rgba(102, 126, 234, 0.2)",
-                      }}
-                    />
-                  </Form.Item>
-                </motion.div>
-
-                <Divider style={{ margin: "40px 0" }} />
-
-                {/* Pricing & Inventory Section */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-                  <Title level={4} style={{ color: "#1a1a1a", marginBottom: "24px", fontSize: "20px", fontWeight: "600" }}>
-                    💰 Pricing & Inventory
-                  </Title>
-
-                  <Row gutter={24}>
-                    <Col xs={24} md={8}>
-                      <Form.Item
-                        label={<Text strong style={{ fontSize: "16px" }}>Price ($)</Text>}
-                        name="price"
-                        rules={[{ required: true, message: "Please enter product price" }]}
-                      >
-                        <Input
-                          type="number"
-                          min={0}
-                          placeholder="0.00"
-                          prefix="$"
-                          style={{
-                            borderRadius: "12px",
-                            border: "1px solid rgba(102, 126, 234, 0.2)",
-                            height: "48px",
-                          }}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={8}>
-                      <Form.Item
-                        label={<Text strong style={{ fontSize: "16px" }}>Stock Quantity</Text>}
-                        name="stock"
-                        rules={[{ required: true, message: "Please enter stock quantity" }]}
-                      >
-                        <Input
-                          type="number"
-                          min={0}
-                          placeholder="Enter quantity"
-                          style={{
-                            borderRadius: "12px",
-                            border: "1px solid rgba(102, 126, 234, 0.2)",
-                            height: "48px",
-                          }}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={8}>
-                      <Form.Item
-                        label={<Text strong style={{ fontSize: "16px" }}>Discount (%)</Text>}
-                        name="discount"
-                        rules={[{ type: "number", min: 0, max: 100 }]}
-                      >
-                        <Input
-                          type="number"
-                          min={0}
-                          max={100}
-                          placeholder="0"
-                          suffix="%"
-                          style={{
-                            borderRadius: "12px",
-                            border: "1px solid rgba(102, 126, 234, 0.2)",
-                            height: "48px",
-                          }}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </motion.div>
-
-                <Divider style={{ margin: "40px 0" }} />
-
-                {/* Category & Media Section */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-                  <Title level={4} style={{ color: "#1a1a1a", marginBottom: "24px", fontSize: "20px", fontWeight: "600" }}>
-                    🏷️ Category & Media
-                  </Title>
-
-                  <Row gutter={24}>
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        label={<Text strong style={{ fontSize: "16px" }}>Category</Text>}
-                        name="category"
-                        rules={[{ required: true, message: "Please select a category" }]}
-                      >
-                        <Select
-                          placeholder="Select a category"
-                          style={{
-                            borderRadius: "12px",
-                            height: "48px",
-                          }}
-                        >
-                          <Option value="Electronics">📱 Electronics</Option>
-                          <Option value="Clothing">👕 Clothing</Option>
-                          <Option value="Books">📚 Books</Option>
-                          <Option value="Home">🏠 Home & Garden</Option>
-                          <Option value="Sports">⚽ Sports & Outdoors</Option>
-                          <Option value="Beauty">💄 Beauty & Health</Option>
-                        </Select>
-                      </Form.Item>
-                    </Col>
-                    <Col xs={24} md={12}>
-                      <Form.Item
-                        label={<Text strong style={{ fontSize: "16px" }}>Product Status</Text>}
-                        name="isActive"
-                        valuePropName="checked"
-                      >
-                        <div
-                          style={{
-                            padding: "12px 16px",
-                            background: "rgba(102, 126, 234, 0.05)",
-                            borderRadius: "12px",
-                            border: "1px solid rgba(102, 126, 234, 0.1)",
-                          }}
-                        >
-                          <Space align="center">
-                            <Switch
-                              checkedChildren="Active"
-                              unCheckedChildren="Inactive"
-                              style={{
-                                backgroundColor: "#667eea",
-                              }}
-                            />
-                            <Text style={{ fontSize: "16px", color: "#6b7280" }}>Make product visible to customers</Text>
-                          </Space>
-                        </div>
-                      </Form.Item>
-                    </Col>
-                  </Row>
-
-                  <Form.Item
-                    label={<Text strong style={{ fontSize: "16px" }}>Product Images</Text>}
-                    name="images"
-                    rules={[{ required: false, message: "Please upload at least one image" }]}
-                  >
-                    <Upload
-                      {...uploadProps}
-                      listType="picture-card"
-                      multiple
-                      className="custom-upload"
-                      accept="image/jpeg,image/png,image/gif,image/webp"
-                      style={{ borderRadius: "12px" }}
-                    >
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ textAlign: "center" }}>
-                        <UploadOutlined style={{ fontSize: "32px", color: "#667eea", marginBottom: "8px" }} />
-                        <div style={{ color: "#6b7280", fontSize: "14px" }}>Click or drag files here</div>
-                        <div style={{ color: "#999999", fontSize: "12px", marginTop: "4px" }}>Max 5MB per image</div>
-                      </motion.div>
-                    </Upload>
-                  </Form.Item>
-                </motion.div>
-
-                <Divider style={{ margin: "40px 0" }} />
-
-                {/* Action Buttons */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} style={{ textAlign: "center" }}>
-                  <Space size="large">
+      {isLoading ? (<Loading />) : (
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+          {/* Header Section */}
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} style={{ marginBottom: "32px" }}>
+            <Card
+              style={{
+                background: "rgba(255, 255, 255, 0.95)",
+                backdropFilter: "blur(20px)",
+                borderRadius: "16px",
+                border: "none",
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+                padding: "24px 32px"
+              }}
+            >
+              <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
+                <Space align="center">
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button
-                      size="large"
+                      type="ghost"
+                      icon={<ArrowLeftOutlined />}
                       onClick={() => navigate("/seller-dashboard/products")}
                       style={{
-                        height: "56px",
-                        borderRadius: "16px",
-                        paddingLeft: "32px",
-                        paddingRight: "32px",
-                        fontSize: "16px",
-                        fontWeight: "500",
+                        border: "1px solid rgba(102, 126, 234, 0.2)",
+                        color: "#667eea",
+                        borderRadius: "12px",
+                        height: "48px",
+                        paddingLeft: "16px",
+                        paddingRight: "16px",
                       }}
                     >
-                      Cancel
+                      Back to Products
                     </Button>
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        loading={isLoading || uploading}
-                        icon={<SaveOutlined />}
-                        size="large"
+                  </motion.div>
+                  <div style={{ marginLeft: "24px" }}>
+                    <Title
+                      level={2}
+                      style={{
+                        margin: 0,
+                        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        fontSize: "32px",
+                        fontWeight: "700",
+                      }}
+                    >
+                      <EditOutlined style={{ marginRight: "12px" }} />
+                      Edit Product
+                    </Title>
+                    <Text style={{ fontSize: "16px", color: "#6b7280" }}>Update your product information and details</Text>
+                  </div>
+                </Space>
+                <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
+                  <ShopOutlined style={{ fontSize: "48px", color: "#667eea", opacity: 0.6 }} />
+                </motion.div>
+              </Space>
+            </Card>
+          </motion.div>
+
+          {/* Main Edit Form */}
+          <motion.div variants={cardVariants}>
+            <Card
+              style={{
+                background: "rgba(255, 255, 255, 0.95)",
+                backdropFilter: "blur(20px)",
+                borderRadius: "24px",
+                border: "none",
+                boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
+              }}
+              bodyStyle={{ padding: "48px" }}
+            >
+              <Spin spinning={isLoading || uploading} size="large">
+                {uploading && uploadProgress > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    style={{ marginBottom: "24px" }}
+                  >
+                    <Progress
+                      percent={uploadProgress}
+                      status={uploadProgress === 100 ? "success" : "active"}
+                      strokeColor={{
+                        "0%": "#667eea",
+                        "100%": "#764ba2",
+                      }}
+                      style={{ marginBottom: "8px" }}
+                    />
+                    <Text type="secondary">{uploadProgress < 100 ? "Uploading images..." : "Upload complete!"}</Text>
+                  </motion.div>
+                )}
+
+                {uploadError && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: "24px" }}>
+                    <Alert
+                      message="Upload Error"
+                      description={uploadError}
+                      type="error"
+                      showIcon
+                      closable
+                      onClose={() => setUploadError("")}
+                    />
+                  </motion.div>
+                )}
+
+                <Form form={form} layout="vertical" onFinish={onFinish} size="large">
+                  {/* Basic Information Section */}
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                    <Title level={4} style={{ color: "#1a1a1a", marginBottom: "24px", fontSize: "20px", fontWeight: "600" }}>
+                      📝 Basic Information
+                    </Title>
+
+                    <Row gutter={24}>
+                      <Col xs={24} md={12}>
+                        <Form.Item
+                          label={<Text strong style={{ fontSize: "16px" }}>Product Name</Text>}
+                          name="name"
+                          rules={[{ required: true, message: "Please enter product name" }]}
+                        >
+                          <Input
+                            placeholder="Enter product name"
+                            style={{
+                              borderRadius: "12px",
+                              border: "1px solid rgba(102, 126, 234, 0.2)",
+                              height: "48px",
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <Form.Item
+                          label={<Text strong style={{ fontSize: "16px" }}>Brand</Text>}
+                          name="brand"
+                          rules={[{ required: true, message: "Please enter brand name" }]}
+                        >
+                          <Input
+                            placeholder="Enter brand name"
+                            style={{
+                              borderRadius: "12px",
+                              border: "1px solid rgba(102, 126, 234, 0.2)",
+                              height: "48px",
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Form.Item
+                      label={<Text strong style={{ fontSize: "16px" }}>Description</Text>}
+                      name="description"
+                      rules={[{ required: true, message: "Please enter product description" }]}
+                    >
+                      <TextArea
+                        rows={4}
+                        placeholder="Describe your product in detail..."
                         style={{
-                          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                          border: "none",
+                          borderRadius: "12px",
+                          border: "1px solid rgba(102, 126, 234, 0.2)",
+                        }}
+                      />
+                    </Form.Item>
+                  </motion.div>
+
+                  <Divider style={{ margin: "40px 0" }} />
+
+                  {/* Pricing & Inventory Section */}
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+                    <Title level={4} style={{ color: "#1a1a1a", marginBottom: "24px", fontSize: "20px", fontWeight: "600" }}>
+                      💰 Pricing & Inventory
+                    </Title>
+
+                    <Row gutter={24}>
+                      <Col xs={24} md={8}>
+                        <Form.Item
+                          label={<Text strong style={{ fontSize: "16px" }}>Price ($)</Text>}
+                          name="price"
+                          rules={[{ required: true, message: "Please enter product price" }]}
+                        >
+                          <Input
+                            type="number"
+                            min={0}
+                            placeholder="0.00"
+                            prefix="$"
+                            style={{
+                              borderRadius: "12px",
+                              border: "1px solid rgba(102, 126, 234, 0.2)",
+                              height: "48px",
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={8}>
+                        <Form.Item
+                          label={<Text strong style={{ fontSize: "16px" }}>Stock Quantity</Text>}
+                          name="stock"
+                          rules={[{ required: true, message: "Please enter stock quantity" }]}
+                        >
+                          <Input
+                            type="number"
+                            min={0}
+                            placeholder="Enter quantity"
+                            style={{
+                              borderRadius: "12px",
+                              border: "1px solid rgba(102, 126, 234, 0.2)",
+                              height: "48px",
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={8}>
+                        <Form.Item
+                          label={<Text strong style={{ fontSize: "16px" }}>Discount (%)</Text>}
+                          name="discount"
+                          rules={[{ type: "number", min: 0, max: 100 }]}
+                        >
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            placeholder="0"
+                            suffix="%"
+                            style={{
+                              borderRadius: "12px",
+                              border: "1px solid rgba(102, 126, 234, 0.2)",
+                              height: "48px",
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </motion.div>
+
+                  <Divider style={{ margin: "40px 0" }} />
+
+                  {/* Category & Media Section */}
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+                    <Title level={4} style={{ color: "#1a1a1a", marginBottom: "24px", fontSize: "20px", fontWeight: "600" }}>
+                      🏷️ Category & Media
+                    </Title>
+
+                    <Row gutter={24}>
+                      <Col xs={24} md={12}>
+                        <Form.Item
+                          label={<Text strong style={{ fontSize: "16px" }}>Category</Text>}
+                          name="category"
+                          rules={[{ required: true, message: "Please select a category" }]}
+                        >
+                          <Select
+                            placeholder="Select a category"
+                            style={{
+                              borderRadius: "12px",
+                              height: "48px",
+                            }}
+                          >
+                            <Option value="Electronics">📱 Electronics</Option>
+                            <Option value="Clothing">👕 Clothing</Option>
+                            <Option value="Books">📚 Books</Option>
+                            <Option value="Home">🏠 Home & Garden</Option>
+                            <Option value="Sports">⚽ Sports & Outdoors</Option>
+                            <Option value="Beauty">💄 Beauty & Health</Option>
+                          </Select>
+                        </Form.Item>
+                      </Col>
+                      <Col xs={24} md={12}>
+                        <Form.Item
+                          label={<Text strong style={{ fontSize: "16px" }}>Product Status</Text>}
+                          name="isActive"
+                          valuePropName="checked"
+                        >
+                          <div
+                            style={{
+                              padding: "12px 16px",
+                              background: "rgba(102, 126, 234, 0.05)",
+                              borderRadius: "12px",
+                              border: "1px solid rgba(102, 126, 234, 0.1)",
+                            }}
+                          >
+                            <Space align="center">
+                              <Switch
+                                checkedChildren="Active"
+                                unCheckedChildren="Inactive"
+                                style={{
+                                  backgroundColor: "#667eea",
+                                }}
+                              />
+                              <Text style={{ fontSize: "16px", color: "#6b7280" }}>Make product visible to customers</Text>
+                            </Space>
+                          </div>
+                        </Form.Item>
+                      </Col>
+                    </Row>
+
+                    <Form.Item
+                      label={<Text strong style={{ fontSize: "16px" }}>Product Images</Text>}
+                      name="images"
+                      rules={[{ required: false, message: "Please upload at least one image" }]}
+                    >
+                      <Upload
+                        {...uploadProps}
+                        listType="picture-card"
+                        multiple
+                        className="custom-upload"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        style={{ borderRadius: "12px" }}
+                      >
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} style={{ textAlign: "center" }}>
+                          <UploadOutlined style={{ fontSize: "32px", color: "#667eea", marginBottom: "8px" }} />
+                          <div style={{ color: "#6b7280", fontSize: "14px" }}>Click or drag files here</div>
+                          <div style={{ color: "#999999", fontSize: "12px", marginTop: "4px" }}>Max 5MB per image</div>
+                        </motion.div>
+                      </Upload>
+                    </Form.Item>
+                  </motion.div>
+
+                  <Divider style={{ margin: "40px 0" }} />
+
+                  {/* Action Buttons */}
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} style={{ textAlign: "center" }}>
+                    <Space size="large">
+                      <Button
+                        size="large"
+                        onClick={() => navigate("/seller-dashboard/products")}
+                        style={{
                           height: "56px",
                           borderRadius: "16px",
                           paddingLeft: "32px",
                           paddingRight: "32px",
                           fontSize: "16px",
-                          fontWeight: "600",
-                          boxShadow: "0 8px 24px rgba(102, 126, 234, 0.3)",
+                          fontWeight: "500",
                         }}
                       >
-                        Update Product
+                        Cancel
                       </Button>
-                    </motion.div>
-                  </Space>
-                </motion.div>
-              </Form>
-            </Spin>
-          </Card>
+                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Button
+                          type="primary"
+                          htmlType="submit"
+                          loading={isLoading || uploading}
+                          icon={<SaveOutlined />}
+                          size="large"
+                          style={{
+                            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                            border: "none",
+                            height: "56px",
+                            borderRadius: "16px",
+                            paddingLeft: "32px",
+                            paddingRight: "32px",
+                            fontSize: "16px",
+                            fontWeight: "600",
+                            boxShadow: "0 8px 24px rgba(102, 126, 234, 0.3)",
+                          }}
+                        >
+                          Update Product
+                        </Button>
+                      </motion.div>
+                    </Space>
+                  </motion.div>
+                </Form>
+              </Spin>
+            </Card>
+          </motion.div>
         </motion.div>
-      </motion.div>
+      )}
     </div>
   );
 };

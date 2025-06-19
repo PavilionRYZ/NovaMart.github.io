@@ -71,7 +71,7 @@ const Footer = () => {
                     <motion.div variants={itemVariants} className="space-y-6">
                         <h3 className="text-2xl font-bold text-white">
                             <Link to="/" className="hover:text-blue-400 transition-colors duration-200">
-                                ShopSphere
+                                NovaMart
                             </Link>
                         </h3>
                         <p className="text-sm text-gray-400 leading-relaxed">

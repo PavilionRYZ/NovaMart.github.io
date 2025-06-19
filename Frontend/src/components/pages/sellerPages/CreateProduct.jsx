@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { createProduct } from "../../../redux/slices/productSlice";
+import { createProduct, clearProductState } from "../../../redux/slices/productSlice";
 import { storage } from "../../../storage/fireBase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from "uuid";
@@ -31,6 +31,7 @@ import {
   DollarOutlined,
   AppstoreOutlined
 } from "@ant-design/icons";
+import "./CreateProduct.css";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -46,14 +47,20 @@ const CreateProduct = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isMounted, setIsMounted] = useState(false); // Track initial mount
 
   useEffect(() => {
-    if (error) toast.error(error);
-    if (message) {
+    setIsMounted(true); // Set mounted state after first render
+    if (error && isMounted) toast.error(error);
+    if (message && isMounted) {
       toast.success(message);
+      dispatch(clearProductState()); // Clear message after handling
       navigate("/seller-dashboard/products");
     }
-  }, [error, message, navigate]);
+    return () => {
+      if (message) dispatch(clearProductState()); // Cleanup on unmount
+    };
+  }, [error, message, navigate, dispatch, isMounted]);
 
   const handleUpload = async (file) => {
     if (!user || !user._id) {
@@ -224,93 +231,36 @@ const CreateProduct = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      style={{
-        padding: "16px",
-        marginLeft: "0",
-        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-        minHeight: "100vh",
-      }}
-      className="create-product-container"
+      className="create-product-container bg-gradient-to-br from-gray-100 to-indigo-200 min-h-screen p-4"
     >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          width: "100%",
-        }}
-      >
+      <div className="max-w-7xl mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          style={{
-            marginBottom: "24px",
-            textAlign: "center",
-            padding: "0 16px",
-          }}
+          className="mb-6 text-center px-4"
         >
-          <Space direction="vertical" size="small" style={{ width: "100%" }}>
-            <div
-              style={{
-                background: "linear-gradient(45deg, #667eea 0%, #764ba2 100%)",
-                borderRadius: "50%",
-                width: "64px",
-                height: "64px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 16px",
-                boxShadow: "0 8px 32px rgba(102, 126, 234, 0.3)",
-              }}
-            >
-              <ShoppingCartOutlined style={{ fontSize: "28px", color: "white" }} />
+          <Space direction="vertical" size="small" className="w-full">
+            <div className="icon-container bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <ShoppingCartOutlined className="text-white text-3xl" />
             </div>
-            <Title
-              level={2}
-              style={{
-                margin: 0,
-                background: "linear-gradient(45deg, #667eea 0%, #764ba2 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                fontSize: "clamp(1.5rem, 4vw, 2rem)",
-              }}
-            >
+            <Title level={2} className="gradient-text text-2xl md:text-3xl">
               Create New Product
             </Title>
-            <Text
-              type="secondary"
-              style={{
-                fontSize: "clamp(14px, 2vw, 16px)",
-                textAlign: "center",
-                display: "block",
-              }}
-            >
+            <Text type="secondary" className="text-sm md:text-base text-center block">
               Add your product details to start selling
             </Text>
           </Space>
         </motion.div>
 
-        <motion.div variants={cardVariants} style={{ padding: "0 16px" }}>
-          <Card
-            style={{
-              borderRadius: "16px",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-              border: "none",
-              background: "rgba(255, 255, 255, 0.95)",
-              backdropFilter: "blur(10px)",
-              width: "100%",
-            }}
-            bodyStyle={{
-              padding: "clamp(20px, 5vw, 40px)",
-            }}
-          >
+        <motion.div variants={cardVariants} className="px-4">
+          <Card className="card-container rounded-2xl shadow-2xl bg-white bg-opacity-95 backdrop-blur-lg w-full p-5 md:p-10">
             <Spin spinning={isLoading || uploading} size="large">
               {uploading && uploadProgress > 0 && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
-                  style={{ marginBottom: "24px" }}
+                  className="mb-6"
                 >
                   <Progress
                     percent={uploadProgress}
@@ -319,7 +269,7 @@ const CreateProduct = () => {
                       "0%": "#667eea",
                       "100%": "#764ba2",
                     }}
-                    style={{ marginBottom: "8px" }}
+                    className="mb-2"
                   />
                   <Text type="secondary">
                     {uploadProgress < 100 ? "Uploading images..." : "Upload complete!"}
@@ -331,7 +281,7 @@ const CreateProduct = () => {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  style={{ marginBottom: "24px" }}
+                  className="mb-6"
                 >
                   <Alert
                     message="Upload Error"
@@ -358,25 +308,10 @@ const CreateProduct = () => {
                   brand: "",
                 }}
               >
-                <div style={{ marginBottom: "clamp(20px, 4vw, 32px)" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "16px",
-                      flexWrap: "wrap",
-                      gap: "8px",
-                    }}
-                  >
-                    <TagOutlined style={{ color: "#667eea", fontSize: "18px" }} />
-                    <Title
-                      level={4}
-                      style={{
-                        margin: 0,
-                        color: "#667eea",
-                        fontSize: "clamp(16px, 3vw, 20px)",
-                      }}
-                    >
+                <div className="mb-8">
+                  <div className="flex items-center mb-4 flex-wrap gap-2">
+                    <TagOutlined className="text-indigo-500 text-lg" />
+                    <Title level={4} className="text-indigo-500 text-lg md:text-xl m-0">
                       Basic Information
                     </Title>
                   </div>
@@ -391,10 +326,7 @@ const CreateProduct = () => {
                         <Input
                           size="large"
                           placeholder="Enter product name"
-                          style={{
-                            borderRadius: "8px",
-                            fontSize: "14px",
-                          }}
+                          className="rounded-lg text-sm"
                         />
                       </Form.Item>
                     </Col>
@@ -407,10 +339,7 @@ const CreateProduct = () => {
                         <Input
                           size="large"
                           placeholder="Enter brand name"
-                          style={{
-                            borderRadius: "8px",
-                            fontSize: "14px",
-                          }}
+                          className="rounded-lg text-sm"
                         />
                       </Form.Item>
                     </Col>
@@ -424,35 +353,17 @@ const CreateProduct = () => {
                     <TextArea
                       rows={4}
                       placeholder="Describe your product in detail..."
-                      style={{
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                      }}
+                      className="rounded-lg text-sm"
                     />
                   </Form.Item>
                 </div>
 
-                <Divider style={{ margin: "clamp(16px, 3vw, 24px) 0" }} />
+                <Divider className="my-6" />
 
-                <div style={{ marginBottom: "clamp(20px, 4vw, 32px)" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "16px",
-                      flexWrap: "wrap",
-                      gap: "8px",
-                    }}
-                  >
-                    <DollarOutlined style={{ color: "#667eea", fontSize: "18px" }} />
-                    <Title
-                      level={4}
-                      style={{
-                        margin: 0,
-                        color: "#667eea",
-                        fontSize: "clamp(16px, 3vw, 20px)",
-                      }}
-                    >
+                <div className="mb-8">
+                  <div className="flex items-center mb-4 flex-wrap gap-2">
+                    <DollarOutlined className="text-indigo-500 text-lg" />
+                    <Title level={4} className="text-indigo-500 text-lg md:text-xl m-0">
                       Pricing & Inventory
                     </Title>
                   </div>
@@ -469,10 +380,7 @@ const CreateProduct = () => {
                           min={0}
                           size="large"
                           placeholder="0.00"
-                          style={{
-                            borderRadius: "8px",
-                            fontSize: "14px",
-                          }}
+                          className="rounded-lg text-sm"
                           prefix="$"
                         />
                       </Form.Item>
@@ -488,10 +396,7 @@ const CreateProduct = () => {
                           min={0}
                           size="large"
                           placeholder="0"
-                          style={{
-                            borderRadius: "8px",
-                            fontSize: "14px",
-                          }}
+                          className="rounded-lg text-sm"
                         />
                       </Form.Item>
                     </Col>
@@ -507,10 +412,7 @@ const CreateProduct = () => {
                           max={100}
                           size="large"
                           placeholder="0"
-                          style={{
-                            borderRadius: "8px",
-                            fontSize: "14px",
-                          }}
+                          className="rounded-lg text-sm"
                           suffix="%"
                         />
                       </Form.Item>
@@ -518,27 +420,12 @@ const CreateProduct = () => {
                   </Row>
                 </div>
 
-                <Divider style={{ margin: "clamp(16px, 3vw, 24px) 0" }} />
+                <Divider className="my-6" />
 
-                <div style={{ marginBottom: "clamp(20px, 4vw, 32px)" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "16px",
-                      flexWrap: "wrap",
-                      gap: "8px",
-                    }}
-                  >
-                    <AppstoreOutlined style={{ color: "#667eea", fontSize: "18px" }} />
-                    <Title
-                      level={4}
-                      style={{
-                        margin: 0,
-                        color: "#667eea",
-                        fontSize: "clamp(16px, 3vw, 20px)",
-                      }}
-                    >
+                <div className="mb-8">
+                  <div className="flex items-center mb-4 flex-wrap gap-2">
+                    <AppstoreOutlined className="text-indigo-500 text-lg" />
+                    <Title level={4} className="text-indigo-500 text-lg md:text-xl m-0">
                       Category
                     </Title>
                   </div>
@@ -553,9 +440,7 @@ const CreateProduct = () => {
                         <Select
                           size="large"
                           placeholder="Select a category"
-                          style={{
-                            borderRadius: "8px",
-                          }}
+                          className="rounded-lg"
                         >
                           <Option value="Electronics">📱 Electronics</Option>
                           <Option value="Clothing">👕 Clothing</Option>
@@ -565,34 +450,18 @@ const CreateProduct = () => {
                           <Option value="Beauty">💄 Beauty & Personal Care</Option>
                           <Option value="Toys">🎁 Toys & Games</Option>
                           <Option value="Health">💊 Health & Wellness</Option>
-
                         </Select>
                       </Form.Item>
                     </Col>
                   </Row>
                 </div>
 
-                <Divider style={{ margin: "clamp(16px, 3vw, 24px) 0" }} />
+                <Divider className="my-6" />
 
-                <div style={{ marginBottom: "clamp(20px, 4vw, 32px)" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: "16px",
-                      flexWrap: "wrap",
-                      gap: "8px",
-                    }}
-                  >
-                    <PictureOutlined style={{ color: "#667eea", fontSize: "18px" }} />
-                    <Title
-                      level={4}
-                      style={{
-                        margin: 0,
-                        color: "#667eea",
-                        fontSize: "clamp(16px, 3vw, 20px)",
-                      }}
-                    >
+                <div className="mb-8">
+                  <div className="flex items-center mb-4 flex-wrap gap-2">
+                    <PictureOutlined className="text-indigo-500 text-lg" />
+                    <Title level={4} className="text-indigo-500 text-lg md:text-xl m-0">
                       Product Images
                     </Title>
                   </div>
@@ -608,44 +477,13 @@ const CreateProduct = () => {
                       multiple
                       className="product-upload"
                       accept="image/jpeg,image/png,image/gif,image/webp"
-                      style={{
-                        width: "100%",
-                      }}
                     >
-                      <div
-                        style={{
-                          textAlign: "center",
-                          padding: "clamp(12px, 3vw, 20px)",
-                          minHeight: "120px",
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <UploadOutlined
-                          style={{
-                            fontSize: "clamp(24px, 5vw, 32px)",
-                            color: "#667eea",
-                            marginBottom: "8px",
-                          }}
-                        />
-                        <div
-                          style={{
-                            color: "#667eea",
-                            fontWeight: "600",
-                            fontSize: "clamp(12px, 2.5vw, 14px)",
-                          }}
-                        >
+                      <div className="upload-container text-center p-4 md:p-5 min-h-[120px] flex flex-col justify-center items-center">
+                        <UploadOutlined className="text-indigo-500 text-2xl md:text-3xl mb-2" />
+                        <div className="text-indigo-500 font-semibold text-sm md:text-base">
                           Click or drag files here
                         </div>
-                        <div
-                          style={{
-                            color: "#999",
-                            fontSize: "clamp(10px, 2vw, 12px)",
-                            marginTop: "4px",
-                          }}
-                        >
+                        <div className="text-gray-500 text-xs md:text-sm mt-1">
                           Max 5MB per image
                         </div>
                       </div>
@@ -653,25 +491,13 @@ const CreateProduct = () => {
                   </Form.Item>
                 </div>
 
-                <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
+                <Form.Item className="mb-0 text-center">
                   <Button
                     type="primary"
                     htmlType="submit"
                     loading={isLoading || uploading}
                     size="large"
-                    style={{
-                      height: "clamp(48px, 8vw, 56px)",
-                      borderRadius: "12px",
-                      fontSize: "clamp(14px, 2.5vw, 16px)",
-                      fontWeight: "600",
-                      background: "linear-gradient(45deg, #667eea 0%, #764ba2 100%)",
-                      border: "none",
-                      boxShadow: "0 4px 16px rgba(102, 126, 234, 0.3)",
-                      minWidth: "clamp(160px, 40vw, 200px)",
-                      width: "100%",
-                      maxWidth: "300px",
-                      transition: "all 0.3s ease",
-                    }}
+                    className="submit-button h-12 md:h-14 rounded-xl text-sm md:text-base font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 border-none shadow-lg w-full max-w-xs md:max-w-sm transition-all duration-300"
                   >
                     {uploading ? "Creating Product..." : "Create Product"}
                   </Button>

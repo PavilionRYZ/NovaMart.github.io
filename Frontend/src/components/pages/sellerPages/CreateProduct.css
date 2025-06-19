@@ -1,0 +1,436 @@
+.gradient-text {
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-container {
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.icon-container {
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+}
+
+/* CreateProduct.css - Beautiful Image Upload Styling */
+
+/* Main container styling */
+.create-product-container {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  /* Gradient text effect */
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+  }
+  
+  /* Card container styling */
+  .card-container {
+    border: none !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 
+                0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 20px !important;
+  }
+  
+  /* Icon container styling */
+  .icon-container {
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .icon-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+  }
+  
+  /* Upload container styling */
+  .product-upload {
+    width: 100% !important;
+  }
+  
+  .product-upload .ant-upload-list {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 16px !important;
+    margin-top: 16px !important;
+  }
+  
+  .product-upload .ant-upload-select {
+    width: 100% !important;
+    height: 160px !important;
+    border: 2px dashed #d1d5db !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+  
+  .product-upload .ant-upload-select::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .product-upload .ant-upload-select:hover {
+    border-color: #667eea !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15) !important;
+  }
+  
+  .product-upload .ant-upload-select:hover::before {
+    opacity: 1;
+  }
+  
+  .product-upload .ant-upload-select:hover .upload-container {
+    transform: scale(1.05);
+  }
+  
+  /* Upload container content */
+  .upload-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+    padding: 20px !important;
+    transition: transform 0.3s ease !important;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .upload-container .anticon {
+    font-size: 32px !important;
+    margin-bottom: 12px !important;
+    color: #667eea !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .product-upload .ant-upload-select:hover .upload-container .anticon {
+    color: #5a67d8 !important;
+    transform: scale(1.1) !important;
+  }
+  
+  .upload-container > div:first-of-type {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #667eea !important;
+    margin-bottom: 8px !important;
+    transition: color 0.3s ease !important;
+  }
+  
+  .upload-container > div:last-of-type {
+    font-size: 12px !important;
+    color: #6b7280 !important;
+    transition: color 0.3s ease !important;
+  }
+  
+  .product-upload .ant-upload-select:hover .upload-container > div:first-of-type {
+    color: #5a67d8 !important;
+  }
+  
+  .product-upload .ant-upload-select:hover .upload-container > div:last-of-type {
+    color: #4b5563 !important;
+  }
+  
+  /* Upload list item styling */
+  .product-upload .ant-upload-list-item {
+    width: 140px !important;
+    height: 140px !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 2px solid #e5e7eb !important;
+    transition: all 0.3s ease !important;
+    position: relative !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  .product-upload .ant-upload-list-item:hover {
+    border-color: #667eea !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15) !important;
+  }
+  
+  .product-upload .ant-upload-list-item-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 10px !important;
+  }
+  
+  /* Upload actions styling */
+  .product-upload .ant-upload-list-item-actions {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+  }
+  
+  .product-upload .ant-upload-list-item:hover .ant-upload-list-item-actions {
+    opacity: 1 !important;
+  }
+  
+  .product-upload .ant-upload-list-item-actions .anticon {
+    color: white !important;
+    font-size: 14px !important;
+    padding: 4px !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .product-upload .ant-upload-list-item-actions .anticon:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.1) !important;
+  }
+  
+  /* Progress indicator styling */
+  .product-upload .ant-upload-list-item-progress {
+    position: absolute !important;
+    bottom: 8px !important;
+    left: 8px !important;
+    right: 8px !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    border-radius: 6px !important;
+    padding: 4px 8px !important;
+  }
+  
+  .product-upload .ant-upload-list-item-progress .ant-progress-bg {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 3px !important;
+  }
+  
+  /* Error state styling */
+  .product-upload .ant-upload-list-item-error {
+    border-color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.05) !important;
+  }
+  
+  .product-upload .ant-upload-list-item-error .ant-upload-list-item-actions {
+    background: rgba(239, 68, 68, 0.8) !important;
+  }
+  
+  /* Success state styling */
+  .product-upload .ant-upload-list-item-done {
+    border-color: #10b981 !important;
+  }
+  
+  .product-upload .ant-upload-list-item-done::after {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: #10b981;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 2;
+  }
+  
+  /* Drag and drop styling */
+  .product-upload .ant-upload-drag {
+    border: 2px dashed #d1d5db !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  .product-upload .ant-upload-drag:hover,
+  .product-upload .ant-upload-drag.ant-upload-drag-hover {
+    border-color: #667eea !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15) !important;
+  }
+  
+  /* Submit button styling */
+  .submit-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  .submit-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4) !important;
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+  }
+  
+  .submit-button:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3) !important;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .product-upload .ant-upload-list {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+      gap: 12px !important;
+    }
+    
+    .product-upload .ant-upload-list-item {
+      width: 120px !important;
+      height: 120px !important;
+    }
+    
+    .product-upload .ant-upload-select {
+      height: 140px !important;
+    }
+    
+    .upload-container {
+      padding: 16px !important;
+    }
+    
+    .upload-container .anticon {
+      font-size: 28px !important;
+    }
+    
+    .upload-container > div:first-of-type {
+      font-size: 14px !important;
+    }
+    
+    .upload-container > div:last-of-type {
+      font-size: 11px !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .product-upload .ant-upload-list {
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+      gap: 8px !important;
+    }
+    
+    .product-upload .ant-upload-list-item {
+      width: 100px !important;
+      height: 100px !important;
+    }
+    
+    .product-upload .ant-upload-select {
+      height: 120px !important;
+    }
+    
+    .upload-container {
+      padding: 12px !important;
+    }
+    
+    .upload-container .anticon {
+      font-size: 24px !important;
+      margin-bottom: 8px !important;
+    }
+    
+    .upload-container > div:first-of-type {
+      font-size: 12px !important;
+      margin-bottom: 4px !important;
+    }
+    
+    .upload-container > div:last-of-type {
+      font-size: 10px !important;
+    }
+  }
+  
+  /* Animation keyframes */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+  
+  /* Loading state animation */
+  .product-upload .ant-upload-list-item-uploading {
+    animation: pulse 2s infinite;
+  }
+  
+  /* Custom scrollbar for the upload area */
+  .product-upload::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .product-upload::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  .product-upload::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 3px;
+  }
+  
+  .product-upload::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+  }
+  
+  /* Enhanced focus states for accessibility */
+  .product-upload .ant-upload-select:focus,
+  .product-upload .ant-upload-select:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+    border-color: #667eea !important;
+  }
+  
+  /* Smooth transitions for all interactive elements */
+  * {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* Dark mode support (if needed) */
+  @media (prefers-color-scheme: dark) {
+    .product-upload .ant-upload-select {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+      border-color: #475569 !important;
+    }
+    
+    .product-upload .ant-upload-select:hover {
+      background: linear-gradient(135deg, #334155 0%, #475569 100%) !important;
+    }
+    
+    .upload-container > div:last-of-type {
+      color: #94a3b8 !important;
+    }
+  }

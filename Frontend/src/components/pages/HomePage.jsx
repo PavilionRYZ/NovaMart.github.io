@@ -73,9 +73,9 @@ const HomePage = () => {
     isMounted.current = true;
     const fetchProducts = async () => {
       try {
-        console.log("Dispatching getProducts with limit: 12");
+        // console.log("Dispatching getProducts with limit: 12");
         const result = await dispatch(getProducts({ limit: 12 })).unwrap();
-        console.log("getProducts succeeded, received:", result);
+        // console.log("getProducts succeeded, received:", result);
       } catch (err) {
         if (isMounted.current) {
           console.error("getProducts failed with error:", err);
@@ -87,7 +87,7 @@ const HomePage = () => {
 
     return () => {
       isMounted.current = false;
-      console.log("Unmounting HomePage, skipping state updates");
+      // console.log("Unmounting HomePage, skipping state updates");
     };
   }, [dispatch]);
 
@@ -143,9 +143,9 @@ const HomePage = () => {
     }),
   };
 
-  console.log("Display products:", displayProducts);
-  console.log("Is loading:", isLoading);
-  console.log("Error:", error);
+  // console.log("Display products:", displayProducts);
+  // console.log("Is loading:", isLoading);
+  // console.log("Error:", error);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">

@@ -10,12 +10,11 @@ import { motion } from 'framer-motion';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import Loading from '../../loading/Loading';
+
 const AddressSelection = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { addresses, selectedAddress, isLoading, error, message } = useSelector((state) => state.address);
-    // const { cart } = useSelector((state) => state.cart);
-
     const [showAddForm, setShowAddForm] = useState(false);
     const [newAddress, setNewAddress] = useState({
         street: '',
@@ -29,11 +28,23 @@ const AddressSelection = () => {
         dispatch(getAllAddress());
     }, [dispatch]);
 
-    const handleAddAddress = () => {
-        dispatch(createAddress(newAddress)).then(() => {
+    const handleAddAddress = async () => {
+        const requiredFields = ['street', 'city', 'state', 'country', 'zipCode'];
+        const emptyFields = requiredFields.filter((field) => !newAddress[field].trim());
+        if (emptyFields.length > 0) {
+            alert(`Please fill in all fields: ${emptyFields.join(', ')}`);
+            return;
+        }
+
+        try {
+            await dispatch(createAddress(newAddress)).unwrap();
             setShowAddForm(false);
             setNewAddress({ street: '', city: '', state: '', country: '', zipCode: '' });
-        });
+            dispatch(getAllAddress()); // Re-fetch to ensure UI updates
+        } catch (err) {
+            console.error('Failed to add address:', err);
+            alert(err || 'Failed to add address. Please try again.');
+        }
     };
 
     const handleProceed = () => {
@@ -44,7 +55,9 @@ const AddressSelection = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 py-6 px-4 sm:px-6 lg:px-8">
-            {isLoading ? (<Loading />) : (
+            {isLoading ? (
+                <Loading />
+            ) : (
                 <div className="max-w-5xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -80,6 +93,14 @@ const AddressSelection = () => {
                                             className="bg-blue-600 hover:bg-blue-700"
                                         >
                                             Retry
+                                        </Button>
+                                        <p className="text-gray-500 mt-2">Or add a new address below.</p>
+                                        <Button
+                                            onClick={() => setShowAddForm(true)}
+                                            className="bg-blue-600 hover:bg-blue-700 mt-2"
+                                        >
+                                            <Plus className="h-4 w-4 mr-1" />
+                                            Add New Address
                                         </Button>
                                     </div>
                                 ) : addresses.length === 0 && !showAddForm ? (
@@ -213,6 +234,15 @@ const AddressSelection = () => {
                                         className="bg-green-100 text-green-800 p-3 rounded-md mt-4"
                                     >
                                         {message}
+                                    </motion.div>
+                                )}
+                                {error && showAddForm && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="bg-red-100 text-red-800 p-3 rounded-md mt-4"
+                                    >
+                                        {error}
                                     </motion.div>
                                 )}
                             </CardContent>

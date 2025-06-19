@@ -30,7 +30,7 @@ import EditProduct from './components/pages/sellerPages/EditProduct';
 import Products from './components/pages/sellerPages/Products';
 import CreateProduct from './components/pages/sellerPages/CreateProduct';
 import AdminDashboard from './components/pages/adminPages/AdminDashboard';
-
+import ScrollToTop from './lib/ScrollToTop';
 
 const App = () => {
   const { isLoading } = useSelector((state) => state.auth);
@@ -41,6 +41,7 @@ const App = () => {
           <Navbar />
           <ErrorBoundary>
             <main>
+              <ScrollToTop />
               <Routes>
                 <Route path='/' element={<HomePage />} />
                 {/* auth route  */}
