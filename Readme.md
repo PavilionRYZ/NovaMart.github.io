@@ -15,7 +15,7 @@ A full-stack NovaMart e-commerce application built with the MERN stack, featurin
 - **Home Page**
 > ![Home Page](https://firebasestorage.googleapis.com/v0/b/finerestate-c1c19.appspot.com/o/Diagrams%2FUi%2Fui1.png?alt=media&token=ae5b5dcd-fee4-4edc-90c6-3c2f148db927)
 - **Product Listing Page**
-> ![Product Listing Page](https://firebasestorage.googleapis.com/v0/b/finerestate-c1c19.appspot.com/o/Diagrams%2FUi%2Fui2.png?alt=media&token=54814b43-2970-4995-9c5a-09624eb19ba3)
+> ![Product Listing Page](https://firebasestorage.googleapis.com/v0/b/finerestate-c1c19.appspot.com/o/Diagrams%2FUi%2Fui11.png?alt=media&token=4b18b858-4445-4b80-a6bc-f62ecbfd514f)
 - **Product Details Page**
 > ![Product Details Page](https://firebasestorage.googleapis.com/v0/b/finerestate-c1c19.appspot.com/o/Diagrams%2FUi%2Fui6.png?alt=media&token=179d0497-e752-4c01-aed1-04946b2895d0)
 - **Cart Page**
