@@ -47,18 +47,18 @@ const CreateProduct = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [isMounted, setIsMounted] = useState(false); // Track initial mount
+  const [isMounted, setIsMounted] = useState(false); 
 
   useEffect(() => {
-    setIsMounted(true); // Set mounted state after first render
+    setIsMounted(true); 
     if (error && isMounted) toast.error(error);
     if (message && isMounted) {
       toast.success(message);
-      dispatch(clearProductState()); // Clear message after handling
+      dispatch(clearProductState()); 
       navigate("/seller-dashboard/products");
     }
     return () => {
-      if (message) dispatch(clearProductState()); // Cleanup on unmount
+      if (message) dispatch(clearProductState()); 
     };
   }, [error, message, navigate, dispatch, isMounted]);
 
@@ -168,7 +168,7 @@ const CreateProduct = () => {
     } finally {
       setUploading(false);
       setUploadProgress(0);
-      setFileList([]); // Clear fileList after submission
+      setFileList([]); 
     }
   };
 
@@ -188,7 +188,7 @@ const CreateProduct = () => {
         toast.error("Image must be smaller than 5MB!");
         return false;
       }
-      // Ensure file has uid and originFileObj
+
       const fileWithUid = {
         ...file,
         uid: file.uid || uuidv4(),
@@ -196,9 +196,13 @@ const CreateProduct = () => {
       };
       setFileList((prev) => [...prev, fileWithUid]);
       console.log(`Added file to fileList: ${file.name}`);
-      return false; // Prevent automatic upload
+      return false; 
     },
     fileList,
+  };
+
+  const handleCategoryChange = (value) => {
+    console.log("Selected category:", value);
   };
 
   const containerVariants = {
@@ -400,7 +404,7 @@ const CreateProduct = () => {
                         />
                       </Form.Item>
                     </Col>
-                    <Col xs={24} sm={12} md={8} lg={8}>
+                    {/* <Col xs={24} sm={12} md={8} lg={8}>
                       <Form.Item
                         label={<Text strong>Discount (%)</Text>}
                         name="discount"
@@ -416,7 +420,7 @@ const CreateProduct = () => {
                           suffix="%"
                         />
                       </Form.Item>
-                    </Col>
+                    </Col> */}
                   </Row>
                 </div>
 
@@ -440,7 +444,7 @@ const CreateProduct = () => {
                         <Select
                           size="large"
                           placeholder="Select a category"
-                          className="rounded-lg"
+                          onChange={handleCategoryChange} 
                         >
                           <Option value="Electronics">📱 Electronics</Option>
                           <Option value="Clothing">👕 Clothing</Option>
@@ -467,7 +471,7 @@ const CreateProduct = () => {
                   </div>
 
                   <Form.Item
-                    label={<Text strong>Upload Images</Text>}
+                    label={<Text strong>Upload Images :<span className="text-gray-500 text-xs md:text-sm mt-1">Max 2MB per image</span></Text>}
                     name="images"
                     rules={[{ required: true, message: "Please upload at least one image" }]}
                   >
@@ -480,12 +484,12 @@ const CreateProduct = () => {
                     >
                       <div className="upload-container text-center p-4 md:p-5 min-h-[120px] flex flex-col justify-center items-center">
                         <UploadOutlined className="text-indigo-500 text-2xl md:text-3xl mb-2" />
-                        <div className="text-indigo-500 font-semibold text-sm md:text-base">
+                        <div className="text-indigo-500 font-semibold text-sm md:text-md">
                           Click or drag files here
                         </div>
-                        <div className="text-gray-500 text-xs md:text-sm mt-1">
-                          Max 5MB per image
-                        </div>
+                        {/* <div className="text-gray-500 text-xs md:text-sm mt-1">
+                          Max 2MB per image
+                        </div> */}
                       </div>
                     </Upload>
                   </Form.Item>

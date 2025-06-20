@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
-import { FaFacebook,FaLinkedinIn ,FaGithub  } from "react-icons/fa";
+import { FaFacebook, FaLinkedinIn, FaGithub } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6"
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -12,30 +12,29 @@ const Footer = () => {
 
     const footerLinks = {
         shop: [
-            { name: 'All Products', path: '/products' },
-            { name: 'Categories', path: '/categories' },
-            { name: 'Deals', path: '/deals' },
-            { name: 'New Arrivals', path: '/new-arrivals' },
+            { name: 'All Products', path: '#' },
+            { name: 'Categories', path: '#' },
+            { name: 'Deals', path: '#' },
+            { name: 'New Arrivals', path: '#' },
         ],
         support: [
-            { name: 'Contact Us', path: '/contact' },
-            { name: 'FAQs', path: '/faqs' },
-            { name: 'Shipping & Returns', path: '/shipping' },
-            { name: 'Track Order', path: '/track-order' },
+            { name: 'Contact Us', path: '#' },
+            { name: 'FAQs', path: '#' },
+            { name: 'About Us', path: '/about' },
+            { name: 'Track Order', path: '#' },
         ],
         company: [
-            { name: 'About Us', path: '/about' },
-            { name: 'Careers', path: '/careers' },
-            { name: 'Privacy Policy', path: '/privacy' },
-            { name: 'Terms of Service', path: '/terms' },
+            { name: 'Careers', path: '#' },
+            { name: 'Privacy Policy', path: '#' },
+            { name: 'Terms of Service', path: '#' },
         ],
     };
 
     const socialLinks = [
-        { icon: FaFacebook, path: 'https://facebook.com', label: 'Facebook' },
-        { icon: FaXTwitter, path: 'https://twitter.com', label: 'Twitter' },
-        { icon: FaGithub, path: 'https://github.com', label: 'GitHub' },
-        { icon: FaLinkedinIn, path: 'https://linkedin.com', label: 'LinkedIn' },
+        // { icon: FaFacebook, path: 'https://facebook.com', label: 'Facebook' },
+        // { icon: FaXTwitter, path: 'https://twitter.com', label: 'Twitter' },
+        { icon: FaGithub, path: 'https://github.com/PavilionRYZ', label: 'GitHub' },
+        { icon: FaLinkedinIn, path: "https://www.linkedin.com/in/subhra-sundar-sinha-779538181/", label: 'LinkedIn' },
     ];
 
     const containerVariants = {

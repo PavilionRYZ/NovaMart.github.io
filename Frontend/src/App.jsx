@@ -31,6 +31,7 @@ import Products from './components/pages/sellerPages/Products';
 import CreateProduct from './components/pages/sellerPages/CreateProduct';
 import AdminDashboard from './components/pages/adminPages/AdminDashboard';
 import ScrollToTop from './lib/ScrollToTop';
+import About from './components/pages/About';
 
 const App = () => {
   const { isLoading } = useSelector((state) => state.auth);
@@ -223,6 +224,12 @@ const App = () => {
                   }
                 />
 
+                <Route
+                  path="/about"
+                  element={
+                    <About />
+                  }
+                />
                 <Route path="*" element={<PageNotFound />} />
               </Routes>
             </main>

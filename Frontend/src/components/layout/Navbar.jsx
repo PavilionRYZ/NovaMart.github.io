@@ -61,9 +61,7 @@ const Navbar = () => {
     const navItems = [
         { name: "Home", path: "/" },
         { name: "Search", path: "/search" },
-        { name: "Shop", path: "/shop" },
-        { name: "Categories", path: "/categories" },
-        { name: "Deals", path: "/deals" },
+        { name: 'About Us', path: '/about' },
     ];
 
     return (
@@ -170,7 +168,7 @@ const Navbar = () => {
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem asChild>
                                                 <Link to="/admin-dashboard" className="w-full flex items-center">
-                                                    <MdAdminPanelSettings  className="mr-2 h-4 w-4" />
+                                                    <MdAdminPanelSettings className="mr-2 h-4 w-4" />
                                                     Admin Dashboard
                                                 </Link>
                                             </DropdownMenuItem>
@@ -318,7 +316,7 @@ const Navbar = () => {
                                                             onClick={() => setIsMobileMenuOpen(false)}
                                                             className="flex items-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 transition-colors"
                                                         >
-                                                            <MdAdminPanelSettings  className="mr-3 h-5 w-5" />
+                                                            <MdAdminPanelSettings className="mr-3 h-5 w-5" />
                                                             Admin Dashboard
                                                         </Link>
                                                         <Link
