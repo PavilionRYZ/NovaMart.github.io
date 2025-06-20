@@ -94,12 +94,12 @@ const EditProduct = () => {
         };
 
         setUploadProgress(70);
-        console.log(`Uploading file: ${fileName}, attempt ${attempt + 1}`);
+        // console.log(`Uploading file: ${fileName}, attempt ${attempt + 1}`);
         const snapshot = await uploadBytes(storageRef, file, metadata);
         setUploadProgress(90);
         const url = await getDownloadURL(snapshot.ref);
         setUploadProgress(100);
-        console.log(`Upload successful: ${url}`);
+        // console.log(`Upload successful: ${url}`);
         return url;
       } catch (err) {
         attempt++;
@@ -139,24 +139,24 @@ const EditProduct = () => {
       }
 
       setUploadProgress(20);
-      console.log(`Starting upload of ${fileList.length} files`);
+      // console.log(`Starting upload of ${fileList.length} files`);
 
       // Process fileList: keep existing URLs and upload new files
       const imageUrls = await Promise.all(
         fileList.map(async (file, index) => {
           if (file.url) {
-            console.log(`Keeping existing image ${index + 1}: ${file.url}`);
+            // console.log(`Keeping existing image ${index + 1}: ${file.url}`);
             return file.url;
           }
           const fileToUpload = file.originFileObj || file;
           if (fileToUpload instanceof File) {
-            console.log(`Processing new file ${index + 1}: ${fileToUpload.name}`);
+            // console.log(`Processing new file ${index + 1}: ${fileToUpload.name}`);
             setUploadProgress(20 + ((index + 1) / fileList.length) * 60);
             const url = await handleUpload(fileToUpload);
-            console.log(`File ${index + 1} uploaded: ${url}`);
+            // console.log(`File ${index + 1} uploaded: ${url}`);
             return url;
           }
-          console.warn(`File ${index + 1} is not a valid File object:`, file);
+          // console.warn(`File ${index + 1} is not a valid File object:`, file);
           return null;
         })
       );
@@ -164,7 +164,7 @@ const EditProduct = () => {
       // Filter out null URLs and fall back to existing images if fileList is empty
       let filteredImageUrls = imageUrls.filter((url) => url !== null);
       if (filteredImageUrls.length === 0 && existingImages.length > 0) {
-        console.log("No new images uploaded, using existing images:", existingImages);
+        // console.log("No new images uploaded, using existing images:", existingImages);
         filteredImageUrls = existingImages;
       }
 
@@ -179,7 +179,7 @@ const EditProduct = () => {
         isActive: values.isActive || false,
       };
 
-      console.log(`Updating product with data:`, productData);
+      // console.log(`Updating product with data:`, productData);
       await dispatch(updateProduct({ productId: id, productData })).unwrap();
       setUploadProgress(100);
       setFileList([]); // Clear fileList only on successful update
@@ -215,7 +215,7 @@ const EditProduct = () => {
         originFileObj: file,
       };
       setFileList((prev) => [...prev, fileWithUid]);
-      console.log(`Added file to fileList: ${file.name}`);
+      // console.log(`Added file to fileList: ${file.name}`);
       return false;
     },
     fileList,

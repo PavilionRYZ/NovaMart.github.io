@@ -20,7 +20,7 @@ const ForgotPassword = () => {
     };
 
     const onFinishFailed = (errorInfo) => {
-        console.log('Failed:', errorInfo);
+        // console.log('Failed:', errorInfo);
     };
 
     const validateEmail = (_, value) => {

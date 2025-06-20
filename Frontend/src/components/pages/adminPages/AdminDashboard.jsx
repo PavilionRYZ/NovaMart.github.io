@@ -52,7 +52,7 @@ const AdminDashboard = () => {
         email: '',
     });
     useEffect(() => {
-        console.log('Dispatching getAllUsers with filters:', filters);
+        // console.log('Dispatching getAllUsers with filters:', filters);
         if (isAuthenticated && user?.role === 'admin') {
             dispatch(getAllUsers(filters));
         }

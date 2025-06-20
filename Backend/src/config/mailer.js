@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Validate environment variables
+
 const requiredEnvVars = ["EMAIL_USER", "EMAIL_PASS"];
 const missingEnvVars = requiredEnvVars.filter(
   (varName) => !process.env[varName]
@@ -25,7 +25,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Verify transporter configuration
 transporter.verify((error, success) => {
   if (error) {
     console.error("SMTP transporter verification failed:", error);
@@ -134,7 +133,7 @@ const sendOtpEmail = async (email, otp) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(`OTP email sent to ${email}`);
+    // console.log(`OTP email sent to ${email}`);
     return { success: true, message: `OTP email sent to ${email}` };
   } catch (error) {
     console.error(`Error sending OTP email to ${email}:`, error);
