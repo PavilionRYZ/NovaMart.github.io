@@ -32,11 +32,13 @@ import CreateProduct from './components/pages/sellerPages/CreateProduct';
 import AdminDashboard from './components/pages/adminPages/AdminDashboard';
 import ScrollToTop from './lib/ScrollToTop';
 import About from './components/pages/About';
+import SetupInterceptors from './setupInterceptors';
 
 const App = () => {
   const { isLoading } = useSelector((state) => state.auth);
   return (
     <Fragment>
+      <SetupInterceptors />
       {isLoading ? (<Loading />) : (
         <div className='flex min-h-screen flex-col'>
           <Navbar />
