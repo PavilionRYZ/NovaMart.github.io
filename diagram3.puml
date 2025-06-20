@@ -1,0 +1,107 @@
+@startuml UseCase_Diagram
+title Multi-Vendor Ecommerce - Use Case Diagram
+
+left to right direction
+
+actor User
+actor Seller
+actor Admin
+actor "Payment Gateway" as PG
+actor "Email Service" as Email
+
+rectangle "Ecommerce System" {
+  
+  ' User Use Cases
+  usecase "Register/Login" as UC1
+  usecase "Browse Products" as UC2
+  usecase "Search Products" as UC3
+  usecase "Add to Cart" as UC4
+  usecase "Remove from Cart" as UC5
+  usecase "Checkout" as UC6
+  usecase "Make Payment" as UC7
+  usecase "View Order History" as UC8
+  usecase "Track Order" as UC9
+  usecase "Rate Product" as UC10
+  usecase "Update Profile" as UC11
+  
+  ' Seller Use Cases
+  usecase "Seller Dashboard" as UC12
+  usecase "Create Product" as UC13
+  usecase "Update Product" as UC14
+  usecase "Delete Product" as UC15
+  usecase "Manage Inventory" as UC16
+  usecase "View Sales Report" as UC17
+  usecase "Process Orders" as UC18
+  usecase "Update Order Status" as UC19
+  usecase "Manage Store Profile" as UC20
+  
+  ' Admin Use Cases
+  usecase "Admin Dashboard" as UC21
+  usecase "Manage Users" as UC22
+  usecase "Change User Roles" as UC23
+  usecase "Delete Users" as UC24
+  usecase "Manage All Products" as UC25
+  usecase "View System Analytics" as UC26
+  usecase "Manage Categories" as UC27
+  usecase "Monitor Transactions" as UC28
+  
+  ' Common Use Cases
+  usecase "Google OAuth Login" as UC29
+  usecase "Send Notifications" as UC30
+  usecase "Generate Reports" as UC31
+}
+
+' User Connections
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC9
+User --> UC10
+User --> UC11
+
+' Seller Connections (Seller can also be a User)
+Seller --> UC1
+Seller --> UC2
+Seller --> UC12
+Seller --> UC13
+Seller --> UC14
+Seller --> UC15
+Seller --> UC16
+Seller --> UC17
+Seller --> UC18
+Seller --> UC19
+Seller --> UC20
+
+' Admin Connections (Admin has all privileges)
+Admin --> UC1
+Admin --> UC2
+Admin --> UC21
+Admin --> UC22
+Admin --> UC23
+Admin --> UC24
+Admin --> UC25
+Admin --> UC26
+Admin --> UC27
+Admin --> UC28
+Admin --> UC13
+Admin --> UC14
+Admin --> UC15
+
+' External System Connections
+UC7 --> PG : processes payment
+UC30 --> Email : sends emails
+UC29 --> "Google OAuth" : authenticates
+
+' Include/Extend Relationships
+UC1 .> UC29 : <<include>>
+UC6 .> UC7 : <<include>>
+UC7 .> UC30 : <<extend>>
+UC13 .> UC30 : <<extend>>
+UC19 .> UC30 : <<extend>>
+
+@enduml

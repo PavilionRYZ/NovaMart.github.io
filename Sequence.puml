@@ -1,0 +1,61 @@
+@startuml Sequence_User_Purchase_Flow
+title User Purchase Flow - Sequence Diagram
+
+actor User
+participant Frontend
+participant "Auth Service" as Auth
+participant "Product Service" as Product
+participant "Cart Service" as Cart
+participant "Order Service" as Order
+participant "Payment Service" as Payment
+participant "Stripe API" as Stripe
+database MongoDB
+
+== Authentication ==
+User -> Frontend: Login Request
+Frontend -> Auth: POST /api/auth/login
+Auth -> MongoDB: Validate Credentials
+MongoDB -> Auth: User Data
+Auth -> Auth: Generate JWT Token
+Auth -> Frontend: JWT Token + User Info
+Frontend -> User: Login Success
+
+== Product Browsing ==
+User -> Frontend: Browse Products
+Frontend -> Product: GET /api/products
+Product -> MongoDB: Fetch Products
+MongoDB -> Product: Product List
+Product -> Frontend: Products Data
+Frontend -> User: Display Products
+
+== Add to Cart ==
+User -> Frontend: Add Product to Cart
+Frontend -> Cart: POST /api/cart/add
+Cart -> MongoDB: Save Cart Item
+MongoDB -> Cart: Confirmation
+Cart -> Frontend: Cart Updated
+Frontend -> User: Product Added to Cart
+
+== Checkout Process ==
+User -> Frontend: Proceed to Checkout
+Frontend -> Order: POST /api/orders/create
+Order -> MongoDB: Create Order Record
+MongoDB -> Order: Order ID
+Order -> Payment: Initialize Payment
+Payment -> Stripe: Create Payment Intent
+Stripe -> Payment: Payment Intent ID
+Payment -> Frontend: Payment Details
+Frontend -> User: Payment Form
+
+== Payment Processing ==
+User -> Frontend: Submit Payment
+Frontend -> Payment: POST /api/payment/process
+Payment -> Stripe: Process Payment
+Stripe -> Payment: Payment Confirmation
+Payment -> Order: Update Order Status
+Order -> MongoDB: Update Order
+MongoDB -> Order: Confirmation
+Order -> Frontend: Order Confirmation
+Frontend -> User: Purchase Complete
+
+@enduml

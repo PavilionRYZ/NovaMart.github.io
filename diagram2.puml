@@ -1,0 +1,54 @@
+@startuml Sequence_Seller_Product_Management
+title Seller Product Management - Sequence Diagram
+
+actor Seller
+participant Frontend
+participant "Auth Middleware" as Auth
+participant "Product Service" as Product
+participant "Upload Service" as Upload
+database MongoDB
+
+== Create Product ==
+Seller -> Frontend: Create New Product
+Frontend -> Product: POST /api/products
+Product -> Auth: Verify JWT & Role
+Auth -> Product: Authorization Success
+Product -> Upload: Upload Product Images
+Upload -> Product: Image URLs
+Product -> MongoDB: Save Product
+MongoDB -> Product: Product Created
+Product -> Frontend: Success Response
+Frontend -> Seller: Product Created Successfully
+
+== Update Product ==
+Seller -> Frontend: Edit Product
+Frontend -> Product: PUT /api/products/:id
+Product -> Auth: Verify Ownership
+Auth -> MongoDB: Check Product Owner
+MongoDB -> Auth: Owner Verification
+Auth -> Product: Authorization Success
+Product -> MongoDB: Update Product
+MongoDB -> Product: Update Confirmation
+Product -> Frontend: Update Success
+Frontend -> Seller: Product Updated
+
+== Manage Orders ==
+Seller -> Frontend: View Orders
+Frontend -> Product: GET /api/orders/seller
+Product -> Auth: Verify Seller Role
+Auth -> Product: Authorization Success
+Product -> MongoDB: Fetch Seller Orders
+MongoDB -> Product: Orders List
+Product -> Frontend: Orders Data
+Frontend -> Seller: Display Orders
+
+Seller -> Frontend: Update Order Status
+Frontend -> Product: PUT /api/orders/:id/status
+Product -> Auth: Verify Order Ownership
+Auth -> Product: Authorization Success
+Product -> MongoDB: Update Order Status
+MongoDB -> Product: Update Confirmation
+Product -> Frontend: Status Updated
+Frontend -> Seller: Order Status Updated
+
+@enduml

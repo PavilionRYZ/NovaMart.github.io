@@ -1,0 +1,201 @@
+@startuml Class_Diagram
+title Multi-Vendor Ecommerce - Class Diagram
+
+class User {
+  -_id: ObjectId
+  -firstName: String
+  -lastName: String
+  -email: String
+  -password: String
+  -role: String
+  -avatar: String
+  -phone: String
+  -address: Address[]
+  -isActive: Boolean
+  -googleId: String
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +register(): User
+  +login(): String
+  +updateProfile(): User
+  +changePassword(): Boolean
+  +addAddress(): Address
+  +removeAddress(): Boolean
+}
+
+class Address {
+  -street: String
+  -city: String
+  -state: String
+  -zipCode: String
+  -country: String
+  -isDefault: Boolean
+}
+
+class Product {
+  -_id: ObjectId
+  -name: String
+  -description: String
+  -price: Number
+  -discountPrice: Number
+  -category: ObjectId
+  -subcategory: String
+  -brand: String
+  -images: String[]
+  -stock: Number
+  -minStock: Number
+  -seller: ObjectId
+  -tags: String[]
+  -specifications: Object
+  -ratings: Rating[]
+  -averageRating: Number
+  -totalReviews: Number
+  -isActive: Boolean
+  -isFeatured: Boolean
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +create(): Product
+  +update(): Product
+  +delete(): Boolean
+  +updateStock(): Boolean
+  +addRating(): Rating
+  +calculateAverageRating(): Number
+}
+
+class Category {
+  -_id: ObjectId
+  -name: String
+  -description: String
+  -image: String
+  -parentCategory: ObjectId
+  -isActive: Boolean
+  -createdAt: Date
+  --
+  +create(): Category
+  +update(): Category
+  +delete(): Boolean
+  +getSubcategories(): Category[]
+}
+
+class Cart {
+  -_id: ObjectId
+  -user: ObjectId
+  -items: CartItem[]
+  -totalPrice: Number
+  -totalItems: Number
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +addItem(): CartItem
+  +removeItem(): Boolean
+  +updateQuantity(): Boolean
+  +clearCart(): Boolean
+  +calculateTotal(): Number
+}
+
+class CartItem {
+  -product: ObjectId
+  -quantity: Number
+  -price: Number
+  -subtotal: Number
+}
+
+class Order {
+  -_id: ObjectId
+  -orderNumber: String
+  -user: ObjectId
+  -items: OrderItem[]
+  -totalAmount: Number
+  -paymentMethod: String
+  -paymentStatus: String
+  -paymentId: String
+  -shippingAddress: Address
+  -billingAddress: Address
+  -orderStatus: String
+  -trackingNumber: String
+  -notes: String
+  -createdAt: Date
+  -updatedAt: Date
+  --
+  +create(): Order
+  +updateStatus(): Boolean
+  +processPayment(): Boolean
+  +generateTrackingNumber(): String
+  +cancel(): Boolean
+}
+
+class OrderItem {
+  -product: ObjectId
+  -seller: ObjectId
+  -quantity: Number
+  -price: Number
+  -subtotal: Number
+  -status: String
+}
+
+class Payment {
+  -_id: ObjectId
+  -order: ObjectId
+  -user: ObjectId
+  -amount: Number
+  -currency: String
+  -paymentMethod: String
+  -stripePaymentIntentId: String
+  -status: String
+  -transactionId: String
+  -createdAt: Date
+  --
+  +processPayment(): Boolean
+  +refund(): Boolean
+  +getPaymentDetails(): Object
+}
+
+class Rating {
+  -user: ObjectId
+  -rating: Number
+  -review: String
+  -createdAt: Date
+}
+
+class Notification {
+  -_id: ObjectId
+  -user: ObjectId
+  -title: String
+  -message: String
+  -type: String
+  -isRead: Boolean
+  -createdAt: Date
+  --
+  +send(): Boolean
+  +markAsRead(): Boolean
+  +delete(): Boolean
+}
+
+' Relationships
+User ||--o{ Address : has
+User ||--o{ Product : sells
+User ||--o{ Order : places
+User ||--|| Cart : has
+User ||--o{ Rating : gives
+User ||--o{ Notification : receives
+
+Product }o--|| Category : belongs to
+Product ||--o{ Rating : has
+Product }o--|| User : sold by
+
+Cart ||--o{ CartItem : contains
+CartItem }o--|| Product : references
+
+Order ||--o{ OrderItem : contains
+OrderItem }o--|| Product : references
+OrderItem }o--|| User : sold by
+
+Order ||--|| Payment : has
+Payment }o--|| User : made by
+
+Product ||--o{ CartItem : referenced by
+Product ||--o{ OrderItem : referenced by
+
+@enduml
