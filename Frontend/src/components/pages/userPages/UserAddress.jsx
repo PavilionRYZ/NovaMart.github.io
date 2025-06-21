@@ -36,35 +36,18 @@ const Addresses = () => {
     const validateForm = (data) => {
         const errors = {};
 
-        // Required field validations
+
         if (!data.street.trim()) errors.street = 'Street is required';
         if (!data.city.trim()) errors.city = 'City is required';
         if (!data.state.trim()) errors.state = 'State is required';
         if (!data.country.trim()) errors.country = 'Country is required';
-        if (!data.zipCode.trim()) errors.zipCode = 'ZIP/Postal code is required';
+        if (!data.zipCode.trim()) errors.zipCode = 'ZIP code is required';
         if (!data.mobileNo.trim()) errors.mobileNo = 'Mobile number is required';
-
-        // ZIP code validation (matching schema validation)
-        if (data.zipCode.trim()) {
-            const zipRegex = /^(\d{5}(-\d{4})?|\d{6}|\d{4}|\w{1,2}\d{1,2}\s?\d{1,2}\w{1,2})$/i;
-            if (!zipRegex.test(data.zipCode.trim())) {
-                errors.zipCode = 'Invalid ZIP/Postal code format. Supported formats: 12345, 12345-6789, 123456, or international postal codes';
-            }
-        }
-
-        // Mobile number validation (matching schema validation)
-        if (data.mobileNo.trim()) {
-            const cleanMobile = data.mobileNo.replace(/[-.\s]/g, '');
-            const mobileRegex = /^(\+\d{1,3}[-.\s]?)?\d{7,15}$/;
-            if (!mobileRegex.test(data.mobileNo)) {
-                errors.mobileNo = 'Invalid mobile number format. Use formats like: +91-9876543210, 9876543210, or +1-555-123-4567';
-            }
-        }
 
         return errors;
     };
 
-    // Handle input changes
+
     const handleInputChange = (e, setData) => {
         const { name, value, type, checked } = e.target;
         setData((prev) => ({
@@ -74,7 +57,7 @@ const Addresses = () => {
         setFormErrors((prev) => ({ ...prev, [name]: '' }));
     };
 
-    // Handle create address
+
     const handleCreate = () => {
         const errors = validateForm(formData);
         if (Object.keys(errors).length > 0) {
@@ -98,7 +81,7 @@ const Addresses = () => {
         });
     };
 
-    // Handle edit address
+
     const handleEdit = (address) => {
         setEditData({
             id: address._id,
@@ -284,13 +267,13 @@ const Addresses = () => {
                                     )}
                                 </div>
                                 <div>
-                                    <Label htmlFor="zipCode">ZIP/Postal Code</Label>
+                                    <Label htmlFor="zipCode">ZIP Code</Label>
                                     <Input
                                         id="zipCode"
                                         name="zipCode"
                                         value={formData.zipCode}
                                         onChange={(e) => handleInputChange(e, setFormData)}
-                                        placeholder="12345, 12345-6789, or international format"
+                                        placeholder="Enter ZIP code"
                                         className={formErrors.zipCode ? 'border-red-500' : ''}
                                     />
                                     {formErrors.zipCode && (
@@ -304,7 +287,7 @@ const Addresses = () => {
                                         name="mobileNo"
                                         value={formData.mobileNo}
                                         onChange={(e) => handleInputChange(e, setFormData)}
-                                        placeholder="+91-9876543210 or 9876543210"
+                                        placeholder="Enter mobile number"
                                         className={formErrors.mobileNo ? 'border-red-500' : ''}
                                     />
                                     {formErrors.mobileNo && (
@@ -402,13 +385,13 @@ const Addresses = () => {
                                         )}
                                     </div>
                                     <div>
-                                        <Label htmlFor="editZipCode">ZIP/Postal Code</Label>
+                                        <Label htmlFor="editZipCode">ZIP Code</Label>
                                         <Input
                                             id="editZipCode"
                                             name="zipCode"
                                             value={editData.zipCode}
                                             onChange={(e) => handleInputChange(e, setEditData)}
-                                            placeholder="12345, 12345-6789, or international format"
+                                            placeholder="Enter ZIP code"
                                             className={formErrors.zipCode ? 'border-red-500' : ''}
                                         />
                                         {formErrors.zipCode && (
@@ -422,7 +405,7 @@ const Addresses = () => {
                                             name="mobileNo"
                                             value={editData.mobileNo}
                                             onChange={(e) => handleInputChange(e, setEditData)}
-                                            placeholder="+91-9876543210 or 9876543210"
+                                            placeholder="Enter mobile number"
                                             className={formErrors.mobileNo ? 'border-red-500' : ''}
                                         />
                                         {formErrors.mobileNo && (

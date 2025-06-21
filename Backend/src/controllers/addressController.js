@@ -5,15 +5,11 @@ import ErrorHandler from "../utils/errorHandler.js";
 // Create a new address
 const createAddress = async (req, res, next) => {
   try {
-    const { street, city, state, country, zipCode, isDefault } = req.body;
+    const { street, city, state, country, zipCode, mobileNo, isDefault } =
+      req.body;
 
-    if (!street || !city || !state || !country || !zipCode) {
+    if (!street || !city || !state || !country || !zipCode || !mobileNo) {
       return next(new ErrorHandler("All address fields are required", 400));
-    }
-
-    const zipRegex = /^\d{5}(-\d{4})?$/;
-    if (!zipRegex.test(zipCode)) {
-      return next(new ErrorHandler("Invalid ZIP code format", 400));
     }
 
     const address = await Address.create({
@@ -23,6 +19,7 @@ const createAddress = async (req, res, next) => {
       state,
       country,
       zipCode,
+      mobileNo,
       isDefault: isDefault || false,
     });
 
@@ -51,7 +48,7 @@ const createAddress = async (req, res, next) => {
 // Update an existing address
 const updateAddress = async (req, res, next) => {
   try {
-    const { id:addressId } = req.params;
+    const { id: addressId } = req.params;
     const { street, city, state, country, zipCode, isDefault } = req.body;
 
     const address = await Address.findById(addressId);
@@ -108,7 +105,7 @@ const updateAddress = async (req, res, next) => {
 // Delete an address
 const deleteAddress = async (req, res, next) => {
   try {
-    const { id:addressId } = req.params;
+    const { id: addressId } = req.params;
 
     const address = await Address.findById(addressId);
     if (!address) {
@@ -164,7 +161,7 @@ const getUserAddresses = async (req, res, next) => {
 // View a single address
 const getAddressById = async (req, res, next) => {
   try {
-    const { id:addressId } = req.params;
+    const { id: addressId } = req.params;
 
     const address = await Address.findById(addressId);
     if (!address) {
