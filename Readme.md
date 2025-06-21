@@ -44,6 +44,11 @@ A full-stack NovaMart e-commerce application built with the MERN stack, featurin
 - **Shopping Cart**: Add products to cart and manage quantities
 - **Secure Checkout**: Complete purchases using Stripe payment gateway
 - **Order Management**: Track order status and history
+- **Address Management**: Add, edit, and delete shipping addresses
+- **Review and Rating**: Leave product reviews and ratings after the order will delivered
+- **User Profile**: Update account information and password
+- **Update Password**: Update user password
+- **Update User Avatar**: Update user profile picture
 - **User Authentication**: Secure login/register with JWT and Google OAuth
 
 ### Seller Features
