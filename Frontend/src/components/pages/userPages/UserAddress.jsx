@@ -7,7 +7,7 @@ import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../ui/dialog';
 import { Skeleton } from '../../ui/skeleton';
-import { MapPin, Plus, Edit, Trash2 } from 'lucide-react';
+import { MapPin, Plus, Edit, Trash2, Phone } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Addresses = () => {
@@ -19,6 +19,7 @@ const Addresses = () => {
         state: '',
         country: '',
         zipCode: '',
+        mobileNo: '',
         isDefault: false,
     });
     const [editData, setEditData] = useState(null);
@@ -34,12 +35,32 @@ const Addresses = () => {
 
     const validateForm = (data) => {
         const errors = {};
+
+        // Required field validations
         if (!data.street.trim()) errors.street = 'Street is required';
         if (!data.city.trim()) errors.city = 'City is required';
         if (!data.state.trim()) errors.state = 'State is required';
         if (!data.country.trim()) errors.country = 'Country is required';
-        if (!data.zipCode.trim()) errors.zipCode = 'ZIP code is required';
-        else if (!/^\d{5}(-\d{4})?$/.test(data.zipCode)) errors.zipCode = 'Invalid ZIP code (e.g., 12345 or 12345-6789)';
+        if (!data.zipCode.trim()) errors.zipCode = 'ZIP/Postal code is required';
+        if (!data.mobileNo.trim()) errors.mobileNo = 'Mobile number is required';
+
+        // ZIP code validation (matching schema validation)
+        if (data.zipCode.trim()) {
+            const zipRegex = /^(\d{5}(-\d{4})?|\d{6}|\d{4}|\w{1,2}\d{1,2}\s?\d{1,2}\w{1,2})$/i;
+            if (!zipRegex.test(data.zipCode.trim())) {
+                errors.zipCode = 'Invalid ZIP/Postal code format. Supported formats: 12345, 12345-6789, 123456, or international postal codes';
+            }
+        }
+
+        // Mobile number validation (matching schema validation)
+        if (data.mobileNo.trim()) {
+            const cleanMobile = data.mobileNo.replace(/[-.\s]/g, '');
+            const mobileRegex = /^(\+\d{1,3}[-.\s]?)?\d{7,15}$/;
+            if (!mobileRegex.test(data.mobileNo)) {
+                errors.mobileNo = 'Invalid mobile number format. Use formats like: +91-9876543210, 9876543210, or +1-555-123-4567';
+            }
+        }
+
         return errors;
     };
 
@@ -68,6 +89,7 @@ const Addresses = () => {
                     state: '',
                     country: '',
                     zipCode: '',
+                    mobileNo: '',
                     isDefault: false,
                 });
                 setIsCreateOpen(false);
@@ -85,6 +107,7 @@ const Addresses = () => {
             state: address.state,
             country: address.country,
             zipCode: address.zipCode,
+            mobileNo: address.mobileNo,
             isDefault: address.isDefault,
         });
         setIsEditOpen(true);
@@ -169,6 +192,10 @@ const Addresses = () => {
                                             <p className="font-medium">{address.street}</p>
                                             <p>{address.city}, {address.state} {address.zipCode}</p>
                                             <p>{address.country}</p>
+                                            <p className="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                                                <Phone className="h-3 w-3" />
+                                                {address.mobileNo}
+                                            </p>
                                             <div className="flex gap-2 mt-3">
                                                 <Button
                                                     variant="outline"
@@ -194,23 +221,13 @@ const Addresses = () => {
                         </CardContent>
                     </Card>
 
-                    {/* {message && !isCreateOpen && !isEditOpen && !deleteId && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="bg-green-100 text-green-800 p-3 rounded-md mb-6"
-                        >
-                            {message}
-                        </motion.div>
-                    )} */}
-
                     {/* Create Address Dialog */}
                     <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                        <DialogContent>
+                        <DialogContent className="max-w-md">
                             <DialogHeader>
                                 <DialogTitle>Add New Address</DialogTitle>
                             </DialogHeader>
-                            <div className="space-y-4">
+                            <div className="space-y-4 max-h-96 overflow-y-auto">
                                 {error && !isEditOpen && !deleteId && (
                                     <div className="bg-red-100 text-red-800 p-3 rounded-md">{error}</div>
                                 )}
@@ -267,17 +284,31 @@ const Addresses = () => {
                                     )}
                                 </div>
                                 <div>
-                                    <Label htmlFor="zipCode">ZIP Code</Label>
+                                    <Label htmlFor="zipCode">ZIP/Postal Code</Label>
                                     <Input
                                         id="zipCode"
                                         name="zipCode"
                                         value={formData.zipCode}
                                         onChange={(e) => handleInputChange(e, setFormData)}
-                                        placeholder="12345 or 12345-6789"
+                                        placeholder="12345, 12345-6789, or international format"
                                         className={formErrors.zipCode ? 'border-red-500' : ''}
                                     />
                                     {formErrors.zipCode && (
                                         <p className="text-red-500 text-sm mt-1">{formErrors.zipCode}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <Label htmlFor="mobileNo">Mobile Number</Label>
+                                    <Input
+                                        id="mobileNo"
+                                        name="mobileNo"
+                                        value={formData.mobileNo}
+                                        onChange={(e) => handleInputChange(e, setFormData)}
+                                        placeholder="+91-9876543210 or 9876543210"
+                                        className={formErrors.mobileNo ? 'border-red-500' : ''}
+                                    />
+                                    {formErrors.mobileNo && (
+                                        <p className="text-red-500 text-sm mt-1">{formErrors.mobileNo}</p>
                                     )}
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -309,12 +340,12 @@ const Addresses = () => {
 
                     {/* Edit Address Dialog */}
                     <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                        <DialogContent>
+                        <DialogContent className="max-w-md">
                             <DialogHeader>
                                 <DialogTitle>Edit Address</DialogTitle>
                             </DialogHeader>
                             {editData && (
-                                <div className="space-y-4">
+                                <div className="space-y-4 max-h-96 overflow-y-auto">
                                     {error && !isCreateOpen && !deleteId && (
                                         <div className="bg-red-100 text-red-800 p-3 rounded-md">{error}</div>
                                     )}
@@ -371,17 +402,31 @@ const Addresses = () => {
                                         )}
                                     </div>
                                     <div>
-                                        <Label htmlFor="editZipCode">ZIP Code</Label>
+                                        <Label htmlFor="editZipCode">ZIP/Postal Code</Label>
                                         <Input
                                             id="editZipCode"
                                             name="zipCode"
                                             value={editData.zipCode}
                                             onChange={(e) => handleInputChange(e, setEditData)}
-                                            placeholder="12345 or 12345-6789"
+                                            placeholder="12345, 12345-6789, or international format"
                                             className={formErrors.zipCode ? 'border-red-500' : ''}
                                         />
                                         {formErrors.zipCode && (
                                             <p className="text-red-500 text-sm mt-1">{formErrors.zipCode}</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="editMobileNo">Mobile Number</Label>
+                                        <Input
+                                            id="editMobileNo"
+                                            name="mobileNo"
+                                            value={editData.mobileNo}
+                                            onChange={(e) => handleInputChange(e, setEditData)}
+                                            placeholder="+91-9876543210 or 9876543210"
+                                            className={formErrors.mobileNo ? 'border-red-500' : ''}
+                                        />
+                                        {formErrors.mobileNo && (
+                                            <p className="text-red-500 text-sm mt-1">{formErrors.mobileNo}</p>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2">

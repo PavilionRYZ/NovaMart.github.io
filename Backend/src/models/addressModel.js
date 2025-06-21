@@ -34,9 +34,25 @@ const addressSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: function (value) {
-          return /^\d{5}(-\d{4})?$/.test(value); // Validates 5-digit ZIP or 5+4 format
+          // Updated regex to support multiple ZIP code formats:
+          // - 5 digits: 12345
+          // - 5 digits with 4-digit extension: 12345-6789
+          // - 6 digits: 123456
+          // - Other common international formats
+          return /^(\d{5}(-\d{4})?|\d{6}|\d{4}|\w{1,2}\d{1,2}\s?\d{1,2}\w{1,2})$/i.test(value);
         },
-        message: "Invalid ZIP code format",
+        message: "Invalid ZIP/Postal code format. Supported formats: 12345, 12345-6789, 123456, or international postal codes",
+      },
+    },
+    mobileNo: {
+      type: String,
+      required: true,
+      trim: true,
+      validate: {
+        validator: function (value) {
+          return /^(\+\d{1,3}[-.\s]?)?\d{7,15}$/.test(value.replace(/[-.\s]/g, ''));
+        },
+        message: "Invalid mobile number format. Use formats like: +91-9876543210, 9876543210, or +1-555-123-4567",
       },
     },
     isDefault: {
