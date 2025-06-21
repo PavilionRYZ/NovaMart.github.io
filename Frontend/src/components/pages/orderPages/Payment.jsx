@@ -305,6 +305,7 @@ const Payment = () => {
         };
         try {
             await dispatch(createOrder(orderData)).unwrap();
+            toast.success('Order placed successfully with Cash on Delivery!');
             navigate('/user-orders', { state: { message: 'Order placed successfully with Cash on Delivery!' } });
         } catch (err) {
             setErrorMessage(err || 'Failed to create order');
