@@ -83,12 +83,22 @@ A full-stack NovaMart e-commerce application built with the MERN stack, featurin
 - **Framer Motion** - Animation library for React
 - **ShadCN UI** - Modern UI components
 - **Ant Design** - Enterprise-class UI design language
+- **Redux/Redux-Toolkit** - For Centralized State Management
+- **React-Router-Dom** - For Client Side Routing
+- **Axios** - Promise based HTTP client for the browser and Node.js
+- **FireBase** - For Storing Images
+- **lucide-react/react-icons** - For Icons
+- **React-Toastify** - For Toast Notifications
 
 ### Backend
 - **Node.js** - JavaScript runtime environment
 - **Express.js** - Web application framework
 - **MongoDB** - NoSQL database
 - **Mongoose** - MongoDB object modeling
+- **Nodemailer** - For Sending Mails
+- **DotEnv** - For Environment Variables
+- **Stripe** - For Payment Processing
+- **Cors** - For Cross-Origin Resource Sharing
 
 ### Authentication & Security
 - **JWT (JSON Web Tokens)** - Secure authentication
