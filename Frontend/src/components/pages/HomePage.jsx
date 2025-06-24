@@ -32,7 +32,7 @@ const carouselImages = [
 ];
 
 const categoryHighlights = [
-  { name: "Furniture", image: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=300&q=80", link: "/category/furniture" },
+  { name: "Furniture", image: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=300&q=80", link: "/search?category=Furniture" },
   { name: "Electronics", image: "https://i.pinimg.com/736x/eb/d8/4a/ebd84aee9bd1feddce359d9803236f4b.jpg", link: "/search?category=Electronics" },
   { name: "Fashion", image: "https://plus.unsplash.com/premium_photo-1664202526559-e21e9c0fb46a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", link: "/search?category=Clothing" },
   { name: "Home & Garden Decor", image: "https://i.pinimg.com/736x/af/01/bd/af01bddb705257d6babb1df1605c1035.jpg", link: "/search?category=Home" },

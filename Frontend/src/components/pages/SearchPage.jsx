@@ -36,8 +36,13 @@ const SearchPage = () => {
         { value: 'Electronics', label: 'Electronics' },
         { value: 'Clothing', label: 'Clothing' },
         { value: 'Books', label: 'Books' },
-        { value: 'Home', label: 'Home & Kitchen' },
+        { value: 'Home', label: 'Home & Garden' },
+        { value: 'Kitchen', label: 'Kitchen & Dining' },
         { value: 'Beauty', label: 'Beauty' },
+        { value: 'Toys', label: 'Toys & Games' },
+        { value: 'Health', label: 'Health & Wellness' },
+        { value: 'Food', label: 'Food & Grocery' },
+        { value: 'Furniture', label: 'Furniture & Home Decor' },
     ];
 
     useEffect(() => {

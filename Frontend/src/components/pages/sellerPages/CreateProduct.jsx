@@ -451,9 +451,12 @@ const CreateProduct = () => {
                           <Option value="Books">📚 Books</Option>
                           <Option value="Sports">⚽ Sports</Option>
                           <Option value="Home">🏠 Home & Garden</Option>
+                          <Option value="Kitchen">🍽️ Kitchen & Dining</Option>
                           <Option value="Beauty">💄 Beauty & Personal Care</Option>
                           <Option value="Toys">🎁 Toys & Games</Option>
                           <Option value="Health">💊 Health & Wellness</Option>
+                          <Option value="Food">🥗 Food & Grocery</Option>
+                          <Option value="Furniture">🛋️ Furniture & Home Decor</Option>
                         </Select>
                       </Form.Item>
                     </Col>
