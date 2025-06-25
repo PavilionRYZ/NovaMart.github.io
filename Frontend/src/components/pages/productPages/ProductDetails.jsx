@@ -246,7 +246,8 @@ const ProductDetails = () => {
                             <img
                                 src={selectedImage}
                                 alt={product.name}
-                                className="w-full h-96 object-cover rounded-lg mb-4"
+                                // className="w-full h-96 object-cover rounded-lg mb-4"
+                                className="w-full max-h-[500px] object-contain rounded-lg mb-4"
                             />
                             <div className="flex space-x-2 overflow-x-auto">
                                 {product.images.map((img, index) => (
