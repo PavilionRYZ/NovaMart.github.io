@@ -5,6 +5,7 @@ import Payment from "../models/paymentModel.js";
 import Cart from "../models/cartModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import mongoose from "mongoose";
+import { sendOrderConfirmationEmail } from "../config/mailer.js";
 
 // Create a new order (requires user role)
 const createOrder = async (req, res, next) => {
@@ -105,6 +106,23 @@ const createOrder = async (req, res, next) => {
 
     cart.items = [];
     await cart.save();
+
+    try {
+      const userEmail = req.user.email; // Assuming req.user contains the email
+      if (!userEmail) {
+        console.warn("User email not found for order confirmation");
+      } else {
+        await sendOrderConfirmationEmail(
+          userEmail,
+          order._id.toString(),
+          order.createdAt,
+          totalAmount
+        );
+      }
+    } catch (emailError) {
+      console.error("Failed to send order confirmation email:", emailError);
+      // Log the error but don't fail the order creation
+    }
 
     res.status(201).json({
       success: true,

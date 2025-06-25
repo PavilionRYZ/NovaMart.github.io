@@ -12,6 +12,7 @@ import {
   saveResetToken,
   verifyResetToken,
 } from "../utils/resetTokenUtils.js";
+import TempUser from "../models/tempUserModel.js";
 
 const sendResponseWithToken = (user, res) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -93,28 +94,32 @@ const signup = async (req, res, next) => {
       }
     }
 
-    const existingUser = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return next(new ErrorHandler("User already exists", 400));
     }
 
     const otp = generateOtp();
-    await saveOtp(email, otp);
-    await sendOtpEmail(email, otp);
+    await saveOtp(normalizedEmail, otp);
+    await sendOtpEmail(normalizedEmail, otp);
 
-    // Store temp user data in session
-    req.session.tempUser = {
-      email,
+    // Store temp user in database
+    await TempUser.deleteMany({ email: normalizedEmail });
+    const tempUser = await TempUser.create({
+      email: normalizedEmail,
       password,
       phone,
       firstName,
       lastName,
       avatar,
-    };
-    req.session.tempUserExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+    // console.log(`Temp user saved for ${normalizedEmail}:`, tempUser);
 
     res.status(200).json({ success: true, message: "OTP sent to your email" });
   } catch (error) {
+    console.error("Signup error:", error);
     return next(new ErrorHandler(`User signup failed: ${error.message}`, 500));
   }
 };
@@ -122,30 +127,26 @@ const signup = async (req, res, next) => {
 const verifyOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
+    // console.log("Verify OTP request:", { email, otp });
 
     if (!email || !otp) {
       return next(new ErrorHandler("Email and OTP are required", 400));
     }
 
-    await validateOtp(email, otp);
+    const normalizedEmail = email.trim().toLowerCase(); // Normalize email
+    await validateOtp(normalizedEmail, otp);
 
-    // Retrieve temp user from session
-    const tempUser = req.session.tempUser;
-    const tempUserExpiry = req.session.tempUserExpiry;
-
-    if (!tempUser || !tempUserExpiry) {
+    const tempUser = await TempUser.findOne({ email: normalizedEmail });
+    // console.log(`Temp user query result for ${normalizedEmail}:`, tempUser);
+    if (!tempUser) {
+      // console.error("No temp user found for:", normalizedEmail);
       return next(new ErrorHandler("Session expired or invalid", 400));
     }
 
-    // Check if session has expired
-    if (Date.now() > tempUserExpiry) {
-      delete req.session.tempUser;
-      delete req.session.tempUserExpiry;
+    if (tempUser.expiresAt < new Date()) {
+      // console.error("Temp user expired for:", normalizedEmail);
+      await TempUser.deleteOne({ email: normalizedEmail });
       return next(new ErrorHandler("Session expired", 400));
-    }
-
-    if (tempUser.email !== email) {
-      return next(new ErrorHandler("Email mismatch", 400));
     }
 
     const newUser = await User.create({
@@ -158,12 +159,12 @@ const verifyOtp = async (req, res, next) => {
       provider: "local",
     });
 
-    // Clear temp user data from session
-    delete req.session.tempUser;
-    delete req.session.tempUserExpiry;
+    await TempUser.deleteOne({ email: normalizedEmail });
+    // console.log(`User created and temp user deleted for ${normalizedEmail}`);
 
     sendResponseWithToken(newUser, res);
   } catch (error) {
+    // console.error("OTP verification error:", error);
     return next(
       new ErrorHandler(`OTP verification failed: ${error.message}`, 400)
     );
