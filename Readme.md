@@ -254,27 +254,98 @@ NovaMart/
 ## 🔧 API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/google` - Google OAuth login
-- `GET /api/auth/profile` - Get user profile
+
+* `POST /api/v1/user/signup` - User registration
+* `POST /api/v1/user/verify-otp` - Verify OTP
+* `POST /api/v1/user/login` - User login
+* `POST /api/v1/auth/google` - Google OAuth login
+* `GET /api/v1/auth/profile` - Get user profile
+* `GET /api/v1/user/logout` - User logout
+* `POST /api/v1/user/forgot-password` - Request password reset
+* `POST /api/v1/user/reset-password/:token` - Reset password
+
+---
+
+### Users
+
+* `PUT /api/v1/users/update-profile` - Update user profile
+* `POST /api/v1/users/update-password` - Change password
+
+---
 
 ### Products
-- `GET /api/products` - Get all products
-- `GET /api/products/:id` - Get single product
-- `POST /api/products` - Create product (Seller/Admin)
-- `PUT /api/products/:id` - Update product (Owner/Admin)
-- `DELETE /api/products/:id` - Delete product (Owner/Admin)
+
+* `GET /api/v1/product/get/all` - Get all products
+* `POST /api/v1/product/add/new` - Add new product (Seller/Admin)  
+* `PATCH /api/v1/product/update/:id` - Update product (Seller/Admin)
+* `DELETE /api/v1/product/delete/:id` - Delete product (Seller/Admin)
+* `GET /api/v1/product/:id` - Get single product
+* `GET /api/v1/product/get/seller` - Get seller's products
+
+---
 
 ### Orders
-- `GET /api/orders` - Get user orders
-- `POST /api/orders` - Create new order
-- `PUT /api/orders/:id` - Update order status (Seller/Admin)
 
-### Users (Admin only)
-- `GET /api/users` - Get all users
-- `PUT /api/users/:id/role` - Change user role
-- `DELETE /api/users/:id` - Delete user
+* `GET /api/v1/order/user` - Get user orders
+* `PUT /api/v1/order/status/update/:id` - Update order status (Seller/Admin)
+* `POST /api/v1/order/create` - Create order
+* `DELETE /api/v1/orders/cancel/:id` - Cancel order
+* `GET /api/v1/orders/seller` - Get seller orders
+* `GET /api/v1/order/get/:id` - Get order by ID
+
+---
+
+### Cart
+
+* `GET /api/v1/cart/get` - Get user's cart
+* `POST /api/v1/cart/add/item` - Add item to cart
+* `PUT /api/v1/cart/update/item` - Update item quantity
+* `DELETE /api/v1/cart/remove/item` - Remove item from cart
+* `DELETE /api/v1/cart/clear` - Clear cart
+
+---
+
+### Addresses
+
+* `POST /api/v1/user/address/create` - Add new address
+* `PATCH /api/v1/user/address/update/:id` - Update address
+* `DELETE /api/v1/user/address/delete/:id` - Delete address
+* `GET /api/v1/user/address/get/all` - Get all addresses of user
+* `GET /api/v1/user/address/get/:id` - Get address by ID
+
+---
+
+### Reviews
+
+* `POST /api/v1/product/review/create/:id` - Create a review
+* `PUT /api/v1/product/review/update/:id` - Update review
+* `DELETE /api/v1/product/review/delete/:id` - Delete review
+* `GET /api/v1/product/reviews/get/:id` - Get reviews for a product
+* `GET /api/v1/review/get/:id` - Get review by ID
+* `POST /api/v1/review/reply/:id` - Seller reply to review
+* `POST /api/v1/review/like/:id` - Like/unlike a review
+* `POST /api/v1/review/helpful/:id` - Mark review as helpful
+
+---
+
+### Payments
+
+* `GET /api/v1/payments/config` - Get Stripe publishable key
+* `POST /api/v1/payments/webhook` - Stripe webhook handler
+* `POST /api/v1/payments/intent` - Create payment intent
+* `POST /api/v1/payments/verify` - Verify payment
+* `GET /api/v1/payments/order/:id` - Get payment by order ID
+* `POST /api/v1/payments/refund` - Refund payment (Under Development)
+
+---
+
+### Admin (Admin Only)
+
+* `GET /api/v1/admin/users/get/all` - Get all users
+* `PUT /api/v1/admin/user/role/change/:id` - Change user role
+* `DELETE /api/v1/admin/user/delete/:id` - Delete user
+
+---
 
 ## 💳 Payment Integration
 
