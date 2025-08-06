@@ -407,7 +407,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Your Name**
 - GitHub: [PavilionRYZ](https://github.com/PavilionRYZ)
-- LinkedIn: [Your LinkedIn](https://www.linkedin.com/in/subhra-sundar-sinha-779538181/)
+- LinkedIn: [Subhra Sundar Sinha](https://www.linkedin.com/in/subhra-sundar-sinha-779538181/)
+- Portfolio: [Subhradev.netlify.app](https://subhradev.netlify.app/)
 - Email: subhrasundarsinha21@gmail.com
 
 ## 🙏 Acknowledgments
