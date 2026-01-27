@@ -94,11 +94,25 @@ const createPaymentIntent = async (req, res, next) => {
       },
     });
   } catch (error) {
+    console.error("Razorpay order create ERROR (raw):", error);
+    console.error("Razorpay order create ERROR keys:", {
+      message: error?.message,
+      name: error?.name,
+      statusCode: error?.statusCode,
+      code: error?.code,
+      description: error?.description,
+      error: error?.error, // razorpay-node often puts API error here
+    });
+
+    const msg =
+      error?.error?.description ||
+      error?.error?.message ||
+      error?.description ||
+      error?.message ||
+      "Razorpay order creation failed";
+
     return next(
-      new ErrorHandler(
-        `Failed to create Razorpay order: ${error.message}`,
-        500,
-      ),
+      new ErrorHandler(`Failed to create Razorpay order: ${msg}`, 500),
     );
   }
 };
