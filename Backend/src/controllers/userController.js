@@ -23,7 +23,7 @@ const sendResponseWithToken = (user, res) => {
   res
     .cookie("token", token, {
       httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: process.env.COOKIE_MAX_AGE,
       path: "/",
