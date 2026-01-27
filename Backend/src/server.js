@@ -22,7 +22,18 @@ mongoStore.on("error", (error) => {
 });
 
 // Middleware
-app.use(express.json());
+// app.use(express.json());
+
+// IMPORTANT: Keep raw body for Razorpay webhooks
+app.use((req, res, next) => {
+  if (req.path === "/api/v1/payments/webhook") {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
+
+
 app.use(cookieParser());
 app.use(
   session({

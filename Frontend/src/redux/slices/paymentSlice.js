@@ -5,30 +5,32 @@ const API_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
 axios.defaults.withCredentials = true;
 
 const initialState = {
-  paymentIntent: null,
-  paymentId: null,
-  stripeConfig: null,
+  paymentIntent: null, // for Razorpay: { orderId, amount, currency, keyId }
+  paymentId: null, // optional: store razorpay orderId here (or keep null)
+  stripeConfig: null, // keep name to avoid touching many imports; will store { keyId }
   isLoading: false,
   error: null,
   message: null,
+  payment: null,
 };
 
-// Get Stripe configuration
+// Get Razorpay configuration (still named getStripeConfig to avoid changing imports everywhere)
 export const getStripeConfig = createAsyncThunk(
   "payment/getStripeConfig",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${API_URL}/payments/config`);
+      // backend will return: { keyId: "rzp_test_..." }
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch Stripe config"
+        error.response?.data?.message || "Failed to fetch Razorpay config",
       );
     }
-  }
+  },
 );
 
-// Create a payment intent
+// Create a payment intent (now creates Razorpay order)
 export const createPaymentIntent = createAsyncThunk(
   "payment/createPaymentIntent",
   async (orderId, { rejectWithValue }) => {
@@ -36,30 +38,32 @@ export const createPaymentIntent = createAsyncThunk(
       const response = await axios.post(`${API_URL}/payments/intent`, {
         id: orderId,
       });
+      // backend will return: { orderId, amount, currency, keyId }
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to create payment intent"
+        error.response?.data?.message || "Failed to create Razorpay order",
       );
     }
-  }
+  },
 );
 
-// Verify payment
+// Verify payment (Razorpay) - NOW expects {paymentId, orderId}
 export const verifyPayment = createAsyncThunk(
   "payment/verifyPayment",
-  async (paymentId, { rejectWithValue }) => {
+  async ({ paymentId, orderId }, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${API_URL}/payments/verify`, {
         paymentId,
+        orderId,
       });
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to verify payment"
+        error.response?.data?.message || "Failed to verify payment",
       );
     }
-  }
+  },
 );
 
 // Get payment by order ID
@@ -71,10 +75,10 @@ export const getPaymentByOrderId = createAsyncThunk(
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to fetch payment"
+        error.response?.data?.message || "Failed to fetch payment",
       );
     }
-  }
+  },
 );
 
 // Refund a payment
@@ -88,10 +92,10 @@ export const refundPayment = createAsyncThunk(
       return response.data.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to refund payment"
+        error.response?.data?.message || "Failed to refund payment",
       );
     }
-  }
+  },
 );
 
 const paymentSlice = createSlice({
@@ -104,11 +108,12 @@ const paymentSlice = createSlice({
       state.isLoading = false;
       state.paymentIntent = null;
       state.paymentId = null;
+      state.payment = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // Get Stripe config
+      // Get config
       .addCase(getStripeConfig.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -116,14 +121,15 @@ const paymentSlice = createSlice({
       })
       .addCase(getStripeConfig.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.stripeConfig = action.payload;
-        state.message = "Stripe config retrieved successfully";
+        state.stripeConfig = action.payload; // { keyId }
+        state.message = "Razorpay config retrieved successfully";
       })
       .addCase(getStripeConfig.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Create payment intent
+
+      // Create Razorpay order
       .addCase(createPaymentIntent.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -131,14 +137,15 @@ const paymentSlice = createSlice({
       })
       .addCase(createPaymentIntent.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.paymentIntent = action.payload;
-        state.paymentId = action.payload.paymentId;
-        state.message = "Payment intent created successfully";
+        state.paymentIntent = action.payload; // { orderId, amount, currency, keyId }
+        state.paymentId = action.payload.orderId; // store Razorpay orderId here
+        state.message = "Razorpay order created successfully";
       })
       .addCase(createPaymentIntent.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       })
+
       // Verify payment
       .addCase(verifyPayment.pending, (state) => {
         state.isLoading = true;
@@ -153,6 +160,7 @@ const paymentSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+
       // Get payment by order ID
       .addCase(getPaymentByOrderId.pending, (state) => {
         state.isLoading = true;
@@ -168,6 +176,7 @@ const paymentSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
+
       // Refund payment
       .addCase(refundPayment.pending, (state) => {
         state.isLoading = true;
