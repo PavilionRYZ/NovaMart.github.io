@@ -5,12 +5,18 @@ import Order from "../models/orderModel.js";
 import ErrorHandler from "../utils/errorHandler.js";
 import mongoose from "mongoose";
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+const getRazorpayClient = () => {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    throw new Error("Razorpay keys missing in environment variables");
+  }
 
-// Create a Razorpay order for online payment (requires user role)
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+};
+
+// Create a Razorpay order for online payment (requires auth; route uses verifyToken)
 const createPaymentIntent = async (req, res, next) => {
   try {
     const { id: orderId } = req.body;
@@ -43,10 +49,13 @@ const createPaymentIntent = async (req, res, next) => {
       return next(new ErrorHandler("Order already paid", 400));
     }
 
-    // Razorpay uses smallest currency unit (paise for INR)
     const amountInPaise = Math.round(order.totalAmount * 100);
+    if (!amountInPaise || amountInPaise < 100) {
+      return next(new ErrorHandler("Amount must be at least ₹1", 400));
+    }
 
-    // Create Razorpay order
+    const razorpay = getRazorpayClient();
+
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
       currency: (process.env.CURRENCY || "INR").toUpperCase(),
@@ -58,7 +67,7 @@ const createPaymentIntent = async (req, res, next) => {
     });
 
     if (existingPayment) {
-      existingPayment.paymentId = razorpayOrder.id; // storing razorpay ORDER id here
+      existingPayment.paymentId = razorpayOrder.id; // store RZP ORDER id initially
       existingPayment.status = "pending";
       await existingPayment.save();
     } else {
@@ -66,7 +75,7 @@ const createPaymentIntent = async (req, res, next) => {
         user: req.user.id,
         order: orderId,
         amount: order.totalAmount,
-        paymentId: razorpayOrder.id, // storing razorpay ORDER id here
+        paymentId: razorpayOrder.id, // store RZP ORDER id initially
         status: "pending",
         paymentMethod: "online",
       });
@@ -117,28 +126,25 @@ const verifyPayment = async (req, res, next) => {
       return next(new ErrorHandler("Not authorized", 403));
     }
 
-    // Fetch payment from Razorpay
+    const paymentRecord = await Payment.findOne({ order: orderId });
+    if (!paymentRecord) {
+      return next(new ErrorHandler("Payment record not found", 404));
+    }
+
+    const razorpay = getRazorpayClient();
     const razorpayPayment = await razorpay.payments.fetch(paymentId);
 
     if (razorpayPayment.status !== "captured") {
       return next(new ErrorHandler("Payment not captured / failed", 400));
     }
 
-    // Update Payment record for this order
-    const paymentRecord = await Payment.findOne({ order: orderId });
-    if (!paymentRecord)
-      return next(new ErrorHandler("Payment record not found", 404));
-
-    // Optional: validate amount
     if (razorpayPayment.amount !== Math.round(paymentRecord.amount * 100)) {
       paymentRecord.status = "failed";
       await paymentRecord.save();
       return next(new ErrorHandler("Payment amount mismatch", 400));
     }
 
-    // Save Razorpay paymentId somewhere:
-    // Your schema only has `paymentId`. Currently it's used to store ORDER id at creation time.
-    // We'll overwrite it with PAYMENT id after success to match your previous logic.
+    // overwrite paymentId with RZP PAYMENT id after success
     paymentRecord.paymentId = paymentId;
     paymentRecord.status = "success";
     await paymentRecord.save();
@@ -157,7 +163,7 @@ const verifyPayment = async (req, res, next) => {
   }
 };
 
-// Handle Razorpay webhook events (public endpoint, no auth required)
+// Handle Razorpay webhook events (public endpoint)
 const handleWebhook = async (req, res, next) => {
   try {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -170,8 +176,6 @@ const handleWebhook = async (req, res, next) => {
       return next(new ErrorHandler("Missing x-razorpay-signature header", 400));
     }
 
-    // IMPORTANT: Razorpay signature expects raw body string.
-    // If your webhook route currently uses express.raw(), make sure server doesn't JSON-parse before it.
     const rawBody = Buffer.isBuffer(req.body)
       ? req.body.toString("utf8")
       : JSON.stringify(req.body);
@@ -191,28 +195,21 @@ const handleWebhook = async (req, res, next) => {
       ? JSON.parse(req.body.toString("utf8"))
       : req.body;
 
-    // Common events: payment.captured, payment.failed
     if (event.event === "payment.captured") {
       const paymentEntity = event.payload.payment.entity;
-
       const orderId = paymentEntity?.notes?.orderId;
-      const userId = paymentEntity?.notes?.userId;
 
-      if (
-        !mongoose.isValidObjectId(orderId) ||
-        !mongoose.isValidObjectId(userId)
-      ) {
+      if (!mongoose.isValidObjectId(orderId)) {
         return next(new ErrorHandler("Invalid metadata in payment notes", 400));
       }
 
-      // Update payment record by order (more reliable than matching by paymentId)
       const paymentRecord = await Payment.findOne({ order: orderId }).populate(
         "order",
       );
       if (!paymentRecord)
         return next(new ErrorHandler("Payment record not found", 404));
 
-      paymentRecord.paymentId = paymentEntity.id; // store Razorpay PAYMENT id
+      paymentRecord.paymentId = paymentEntity.id;
       paymentRecord.status = "success";
       await paymentRecord.save();
 
@@ -232,9 +229,10 @@ const handleWebhook = async (req, res, next) => {
       }
     }
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Webhook processed successfully" });
+    return res.status(200).json({
+      success: true,
+      message: "Webhook processed successfully",
+    });
   } catch (error) {
     return next(
       new ErrorHandler(`Failed to process webhook: ${error.message}`, 500),
@@ -242,7 +240,7 @@ const handleWebhook = async (req, res, next) => {
   }
 };
 
-// Refund a payment (requires admin role)
+// Refund a payment (requires admin route)
 const refundPayment = async (req, res, next) => {
   try {
     const { paymentId } = req.body;
@@ -259,12 +257,13 @@ const refundPayment = async (req, res, next) => {
     if (!order)
       return next(new ErrorHandler("Associated order not found", 404));
 
+    const razorpay = getRazorpayClient();
     const refund = await razorpay.payments.refund(paymentId, {
       amount: Math.round(payment.amount * 100),
       notes: { orderId: order._id.toString(), reason: "Refund" },
     });
 
-    payment.status = "failed"; // or introduce "refunded" status if you want
+    payment.status = "failed"; // or create "refunded"
     await payment.save();
 
     order.orderStatus = "cancelled";
@@ -282,7 +281,7 @@ const refundPayment = async (req, res, next) => {
   }
 };
 
-// Get payment details by order ID (requires user for own orders or admin)
+// Get payment details by order ID
 const getPaymentByOrderId = async (req, res, next) => {
   try {
     const { id: orderId } = req.params;
@@ -314,7 +313,7 @@ const getPaymentByOrderId = async (req, res, next) => {
   }
 };
 
-// Replace Stripe config endpoint with Razorpay Key ID
+// Keep same endpoint name, now returns Razorpay keyId
 const getStripeConfig = async (req, res, next) => {
   try {
     return res.status(200).json({

@@ -11,6 +11,12 @@ connectToMongo();
 
 const app = express();
 
+// IMPORTANT: Keep raw body for Razorpay webhooks
+app.use((req, res, next) => {
+  if (req.path === "/api/v1/payments/webhook") return next();
+  return express.json()(req, res, next);
+});
+
 // Session store
 const mongoStore = MongoStore.create({
   mongoUrl: process.env.MONGO_URI,
@@ -21,20 +27,8 @@ mongoStore.on("error", (error) => {
   console.error("MongoDB session store error:", error);
 });
 
-// Middleware
-// app.use(express.json());
-
-// IMPORTANT: Keep raw body for Razorpay webhooks
-app.use((req, res, next) => {
-  if (req.path === "/api/v1/payments/webhook") {
-    next();
-  } else {
-    express.json()(req, res, next);
-  }
-});
-
-
 app.use(cookieParser());
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "your-default-secret",
@@ -47,24 +41,17 @@ app.use(
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     },
-  })
+  }),
 );
+
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3050",
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
-
-// Debug session
-// app.use((req, res, next) => {
-//   console.log(`Request: ${req.method} ${req.url}`);
-//   console.log("Session ID:", req.sessionID);
-//   console.log("Session data:", req.session);
-//   next();
-// });
 
 // Routes
 import userRouter from "./routes/userRouter.js";
@@ -90,11 +77,7 @@ app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
   console.error("Error:", err);
-  res.status(statusCode).json({
-    success: false,
-    statusCode,
-    message,
-  });
+  res.status(statusCode).json({ success: false, statusCode, message });
 });
 
 const PORT = process.env.PORT || 5001;
@@ -102,7 +85,6 @@ const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-// Error handlers
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);
   process.exit(1);
@@ -110,7 +92,5 @@ process.on("uncaughtException", (err) => {
 
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled Rejection:", err);
-  server.close(() => {
-    process.exit(1);
-  });
+  server.close(() => process.exit(1));
 });
