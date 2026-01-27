@@ -34,7 +34,7 @@ export const verifyToken = async (req, res, next) => {
     // Check if user account is active (e.g., not suspended)
     if (user.role === "user" && !user.addresses) {
       return next(
-        new ErrorHandler("User account incomplete: Address required", 403)
+        new ErrorHandler("User account incomplete: Address required", 403),
       );
     }
 
@@ -49,7 +49,7 @@ export const verifyToken = async (req, res, next) => {
       return next(new ErrorHandler("Forbidden: Invalid token", 401));
     }
     return next(
-      new ErrorHandler(`Authentication failed: ${error.message}`, 401)
+      new ErrorHandler(`Authentication failed: ${error.message}`, 401),
     );
   }
 };
@@ -59,7 +59,7 @@ export const verifyAdmin = (req, res, next) => {
   try {
     if (!req.user) {
       return next(
-        new ErrorHandler("Unauthorized: User not authenticated", 401)
+        new ErrorHandler("Unauthorized: User not authenticated", 401),
       );
     }
     if (req.user.role !== "admin") {
@@ -68,7 +68,7 @@ export const verifyAdmin = (req, res, next) => {
     next();
   } catch (error) {
     return next(
-      new ErrorHandler(`Admin verification failed: ${error.message}`, 500)
+      new ErrorHandler(`Admin verification failed: ${error.message}`, 500),
     );
   }
 };
@@ -78,19 +78,19 @@ export const verifySeller = (req, res, next) => {
   try {
     if (!req.user) {
       return next(
-        new ErrorHandler("Unauthorized: User not authenticated", 401)
+        new ErrorHandler("Unauthorized: User not authenticated", 401),
       );
     }
     if (req.user.role !== "seller" && req.user.role !== "admin") {
-      console.log(req.user.role)
+      console.log(req.user.role);
       return next(
-        new ErrorHandler("Unauthorized: Seller or admin access required", 403)
+        new ErrorHandler("Unauthorized: Seller or admin access required", 403),
       );
     }
     next();
   } catch (error) {
     return next(
-      new ErrorHandler(`Seller verification failed: ${error.message}`, 500)
+      new ErrorHandler(`Seller verification failed: ${error.message}`, 500),
     );
   }
 };
@@ -99,16 +99,20 @@ export const verifyUser = (req, res, next) => {
   try {
     if (!req.user) {
       return next(
-        new ErrorHandler("Unauthorized: User not authenticated", 401)
+        new ErrorHandler("Unauthorized: User not authenticated", 401),
       );
     }
-    if (req.user.role !== "user") {
+    if (
+      req.user.role !== "seller" &&
+      req.user.role !== "user" &&
+      req.user.role !== "admin"
+    ) {
       return next(new ErrorHandler("Unauthorized: User role required", 403));
     }
     next();
   } catch (error) {
     return next(
-      new ErrorHandler(`User verification failed: ${error.message}`, 500)
+      new ErrorHandler(`User verification failed: ${error.message}`, 500),
     );
   }
 };
