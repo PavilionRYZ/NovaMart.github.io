@@ -11,11 +11,20 @@ connectToMongo();
 
 const app = express();
 
-// IMPORTANT: Keep raw body for Razorpay webhooks
 app.use((req, res, next) => {
   if (req.path === "/api/v1/payments/webhook") return next();
   return express.json()(req, res, next);
 });
+
+//health check endpoint in your backend
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 
 // Session store
 const mongoStore = MongoStore.create({
