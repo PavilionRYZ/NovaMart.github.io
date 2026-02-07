@@ -42,7 +42,14 @@ const orderSchema = new mongoose.Schema(
     payment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Payment",
-      required: false, 
+      required: false,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid", "failed"],
+      default: function () {
+        return this.paymentMethod === "cash_on_delivery" ? "paid" : "unpaid";
+      },
     },
     orderStatus: {
       type: String,
@@ -55,7 +62,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.model("Order", orderSchema);

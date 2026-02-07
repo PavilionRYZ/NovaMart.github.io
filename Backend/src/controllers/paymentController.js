@@ -59,7 +59,7 @@ const createPaymentIntent = async (req, res, next) => {
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
       currency: (process.env.CURRENCY || "INR").toUpperCase(),
-      receipt: `receipt_${orderId}_${Date.now()}`,
+      receipt: `rcpt_${orderId.toString().slice(-20)}`,
       notes: {
         orderId: orderId.toString(),
         userId: req.user.id,
@@ -164,6 +164,7 @@ const verifyPayment = async (req, res, next) => {
     await paymentRecord.save();
 
     order.orderStatus = "dispatched";
+    order.paymentStatus = "paid";
     await order.save();
 
     return res.status(200).json({

@@ -16,8 +16,8 @@ const createOrder = async (req, res, next) => {
       return next(
         new ErrorHandler(
           "Shipping address and payment method are required",
-          400
-        )
+          400,
+        ),
       );
     }
 
@@ -28,12 +28,12 @@ const createOrder = async (req, res, next) => {
     const address = await Address.findById(shippingAddressId);
     if (!address || address.user.toString() !== req.user.id) {
       return next(
-        new ErrorHandler("Invalid or unauthorized shipping address", 404)
+        new ErrorHandler("Invalid or unauthorized shipping address", 404),
       );
     }
 
     const cart = await Cart.findOne({ user: req.user.id }).populate(
-      "items.product"
+      "items.product",
     );
     if (!cart || cart.items.length === 0) {
       return next(new ErrorHandler("Cart is empty", 400));
@@ -47,12 +47,12 @@ const createOrder = async (req, res, next) => {
       const product = item.product;
       if (!product.isActive) {
         return next(
-          new ErrorHandler(`Product ${product.name} is inactive`, 400)
+          new ErrorHandler(`Product ${product.name} is inactive`, 400),
         );
       }
       if (product.stock < item.quantity) {
         return next(
-          new ErrorHandler(`Insufficient stock for ${product.name}`, 400)
+          new ErrorHandler(`Insufficient stock for ${product.name}`, 400),
         );
       }
 
@@ -98,7 +98,8 @@ const createOrder = async (req, res, next) => {
         zipCode: address.zipCode,
       },
       paymentMethod,
-      orderStatus: "pending",
+      orderStatus: paymentMethod === "cash_on_delivery" ? "pending" : "pending",
+      paymentStatus: paymentMethod === "cash_on_delivery" ? "paid" : "unpaid",
       seller: sellerId,
     });
 
@@ -108,7 +109,7 @@ const createOrder = async (req, res, next) => {
     await cart.save();
 
     try {
-      const userEmail = req.user.email; // Assuming req.user contains the email
+      const userEmail = req.user.email; 
       if (!userEmail) {
         console.warn("User email not found for order confirmation");
       } else {
@@ -116,12 +117,11 @@ const createOrder = async (req, res, next) => {
           userEmail,
           order._id.toString(),
           order.createdAt,
-          totalAmount
+          totalAmount,
         );
       }
     } catch (emailError) {
       console.error("Failed to send order confirmation email:", emailError);
-      // Log the error but don't fail the order creation
     }
 
     res.status(201).json({
@@ -137,7 +137,7 @@ const createOrder = async (req, res, next) => {
       return next(new ErrorHandler(`Validation failed: ${message}`, 400));
     }
     return next(
-      new ErrorHandler(`Failed to create order: ${error.message}`, 500)
+      new ErrorHandler(`Failed to create order: ${error.message}`, 500),
     );
   }
 };
@@ -159,7 +159,7 @@ const updateOrderStatus = async (req, res, next) => {
 
     if (order.orderStatus === "delivered") {
       return next(
-        new ErrorHandler("Cannot update status of a delivered order", 400)
+        new ErrorHandler("Cannot update status of a delivered order", 400),
       );
     }
 
@@ -185,7 +185,7 @@ const updateOrderStatus = async (req, res, next) => {
       return next(new ErrorHandler(`Validation failed: ${message}`, 400));
     }
     return next(
-      new ErrorHandler(`Failed to update order status: ${error.message}`, 500)
+      new ErrorHandler(`Failed to update order status: ${error.message}`, 500),
     );
   }
 };
@@ -229,7 +229,7 @@ const cancelOrder = async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(`Failed to cancel order: ${error.message}`, 500)
+      new ErrorHandler(`Failed to cancel order: ${error.message}`, 500),
     );
   }
 };
@@ -253,7 +253,7 @@ const getUserOrders = async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(`Failed to retrieve orders: ${error.message}`, 500)
+      new ErrorHandler(`Failed to retrieve orders: ${error.message}`, 500),
     );
   }
 };
@@ -279,7 +279,7 @@ const getSellerOrders = async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(`Failed to retrieve orders: ${error.message}`, 500)
+      new ErrorHandler(`Failed to retrieve orders: ${error.message}`, 500),
     );
   }
 };
@@ -309,8 +309,8 @@ const getOrderById = async (req, res, next) => {
     // console.log("Order seller ID:", order.seller.toString());
     // console.log("User role:", req.user.role);
     if (
-      order.user._id.toString() !== req.user.id && 
-      order.seller._id.toString() !== req.user.id && 
+      order.user._id.toString() !== req.user.id &&
+      order.seller._id.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
       return next(new ErrorHandler("Not authorized to view this order", 403));
@@ -323,7 +323,7 @@ const getOrderById = async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(`Failed to retrieve order: ${error.message}`, 500)
+      new ErrorHandler(`Failed to retrieve order: ${error.message}`, 500),
     );
   }
 };

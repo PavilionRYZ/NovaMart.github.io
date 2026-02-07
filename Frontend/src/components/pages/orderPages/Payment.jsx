@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { createOrder, clearOrderState } from "../../../redux/slices/orderSlice";
 import {
     createPaymentIntent,
-    // keep same name (your backend route is /payments/config but now returns keyId)
     getStripeConfig,
     verifyPayment,
     clearPaymentState,
@@ -16,6 +15,7 @@ import { CreditCard, DollarSign, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
 import Loading from "../../loading/Loading";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 const loadRazorpayScript = () =>
     new Promise((resolve) => {
@@ -63,22 +63,11 @@ const Payment = () => {
         setPaymentMethod(method);
         setErrorMessage(null);
 
-        if (method === "online") {
-            try {
-                const result = await dispatch(
-                    createOrder({ shippingAddressId, paymentMethod: "online" })
-                ).unwrap();
-
-                const newOrderId = result._id;
-                setOrderId(newOrderId);
-
-                // backend returns { orderId, amount, currency, keyId }
-                await dispatch(createPaymentIntent(newOrderId)).unwrap();
-            } catch (err) {
-                setErrorMessage(err || "Failed to create order or payment order");
-            }
+        if (method === "cash_on_delivery") {
+            return;
         }
     };
+
 
     const handleCashOnDelivery = async () => {
         try {
@@ -86,15 +75,41 @@ const Payment = () => {
                 createOrder({ shippingAddressId, paymentMethod: "cash_on_delivery" })
             ).unwrap();
             toast.success("Order placed successfully with Cash on Delivery!");
-            navigate("/user-orders", { state: { message: "Order placed successfully with Cash on Delivery!" } });
+            navigate("/user-orders", {
+                state: { message: "Order placed successfully with Cash on Delivery!" }
+            });
         } catch (err) {
             setErrorMessage(err || "Failed to create order");
         }
     };
 
-    const openRazorpay = async () => {
+    const initiateOnlinePayment = async () => {
         setProcessing(true);
 
+        try {
+            // Step 1: Create order first
+            const orderResult = await dispatch(
+                createOrder({ shippingAddressId, paymentMethod: "online" })
+            ).unwrap();
+
+            const newOrderId = orderResult._id;
+            setOrderId(newOrderId);
+
+            // Step 2: Create Razorpay order
+            const paymentResult = await dispatch(
+                createPaymentIntent(newOrderId)
+            ).unwrap();
+
+            // Step 3: Open Razorpay immediately
+            openRazorpayCheckout(newOrderId, paymentResult);
+
+        } catch (err) {
+            setErrorMessage(err || "Failed to initiate payment");
+            setProcessing(false);
+        }
+    };
+
+    const openRazorpayCheckout = async (orderIdToUse, paymentIntentData) => {
         const ok = await loadRazorpayScript();
         if (!ok) {
             toast.error("Failed to load Razorpay checkout.");
@@ -102,8 +117,8 @@ const Payment = () => {
             return;
         }
 
-        const keyId = stripeConfig?.keyId; // from /payments/config
-        const razorpayOrderId = paymentIntent?.orderId; // from /payments/intent
+        const keyId = stripeConfig?.keyId;
+        const razorpayOrderId = paymentIntentData?.orderId;
 
         if (!keyId || !razorpayOrderId) {
             toast.error("Razorpay config/order missing.");
@@ -117,7 +132,7 @@ const Payment = () => {
             amount: Math.round((cart?.totalPrice || 0) * 100),
             currency: "INR",
             name: "NovaMart",
-            description: `Payment for order #${orderId}`,
+            description: `Payment for order #${orderIdToUse}`,
             prefill: {
                 name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
                 email: user?.email || "",
@@ -125,26 +140,31 @@ const Payment = () => {
             },
             handler: async (response) => {
                 try {
-                    // response.razorpay_payment_id is the PAYMENT id
                     await dispatch(
-                        verifyPayment({ paymentId: response.razorpay_payment_id, orderId })
+                        verifyPayment({
+                            paymentId: response.razorpay_payment_id,
+                            orderId: orderIdToUse
+                        })
                     ).unwrap();
 
                     toast.success("Payment successful! Your order is now dispatched.");
                     dispatch(clearPaymentState());
                     dispatch(clearOrderState());
-                    navigate("/profile/orders", {
+                    navigate("/user-orders", {
                         state: { message: "Order placed successfully with online payment!" },
                     });
                 } catch (err) {
                     toast.error(err || "Failed to verify payment");
+                    await cancelFailedOrder(orderIdToUse);
                 } finally {
                     setProcessing(false);
                 }
             },
             modal: {
-                ondismiss: () => {
+                ondismiss: async () => {
                     toast.warning("Payment cancelled.");
+                    // ⚠️ Important: Cancel order when user closes modal
+                    await cancelFailedOrder(orderIdToUse);
                     setProcessing(false);
                 },
             },
@@ -154,6 +174,81 @@ const Payment = () => {
         const rzp = new window.Razorpay(options);
         rzp.open();
     };
+
+    const cancelFailedOrder = async (orderIdToCancel) => {
+        try {
+            await axios.delete(
+                `${import.meta.env.VITE_API_URL}/api/v1/orders/cancel/${orderIdToCancel}`,
+                { withCredentials: true }
+            );
+        } catch (error) {
+            console.error("Failed to cancel order:", error);
+        }
+    };
+
+
+    // const openRazorpay = async () => {
+    //     setProcessing(true);
+
+    //     const ok = await loadRazorpayScript();
+    //     if (!ok) {
+    //         toast.error("Failed to load Razorpay checkout.");
+    //         setProcessing(false);
+    //         return;
+    //     }
+
+    //     const keyId = stripeConfig?.keyId; // from /payments/config
+    //     const razorpayOrderId = paymentIntent?.orderId; // from /payments/intent
+
+    //     if (!keyId || !razorpayOrderId) {
+    //         toast.error("Razorpay config/order missing.");
+    //         setProcessing(false);
+    //         return;
+    //     }
+
+    //     const options = {
+    //         key: keyId,
+    //         order_id: razorpayOrderId,
+    //         amount: Math.round((cart?.totalPrice || 0) * 100),
+    //         currency: "INR",
+    //         name: "NovaMart",
+    //         description: `Payment for order #${orderId}`,
+    //         prefill: {
+    //             name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim(),
+    //             email: user?.email || "",
+    //             contact: user?.phone || "",
+    //         },
+    //         handler: async (response) => {
+    //             try {
+    //                 // response.razorpay_payment_id is the PAYMENT id
+    //                 await dispatch(
+    //                     verifyPayment({ paymentId: response.razorpay_payment_id, orderId })
+    //                 ).unwrap();
+
+    //                 toast.success("Payment successful! Your order is now dispatched.");
+    //                 dispatch(clearPaymentState());
+    //                 dispatch(clearOrderState());
+    //                 navigate("/profile/orders", {
+    //                     state: { message: "Order placed successfully with online payment!" },
+    //                 });
+    //             } catch (err) {
+    //                 toast.error(err || "Failed to verify payment");
+    //             } finally {
+    //                 setProcessing(false);
+    //             }
+    //         },
+    //         modal: {
+    //             ondismiss: () => {
+    //                 toast.warning("Payment cancelled.");
+    //                 setProcessing(false);
+    //             },
+    //         },
+    //         theme: { color: "#2563eb" },
+    //     };
+
+    //     const rzp = new window.Razorpay(options);
+    //     rzp.open();
+    // };
 
     return (
         <div className="min-h-screen bg-gray-100 py-6 px-4 sm:px-6 lg:px-8">
@@ -217,18 +312,19 @@ const Payment = () => {
                                             </div>
                                         )}
 
-                                        {paymentMethod === "online" && paymentIntent?.orderId && stripeConfig?.keyId && (
+                                        {paymentMethod === "online" && (
                                             <div className="text-center">
                                                 <p className="text-gray-600 mb-3">Total: ₹{cart.totalPrice.toFixed(2)}</p>
                                                 <Button
-                                                    onClick={openRazorpay}
+                                                    onClick={initiateOnlinePayment}
                                                     className="bg-green-600 hover:bg-green-700 w-full"
                                                     disabled={processing}
                                                 >
-                                                    {processing ? "Opening..." : "Pay with Razorpay"}
+                                                    {processing ? "Processing..." : "Proceed to Pay"}
                                                 </Button>
                                             </div>
                                         )}
+
 
                                         {paymentMethod === "online" && (!paymentIntent?.orderId || !stripeConfig?.keyId) && (
                                             <div className="space-y-4">
