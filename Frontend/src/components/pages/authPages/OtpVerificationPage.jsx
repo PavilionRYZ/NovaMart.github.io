@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
@@ -42,7 +42,7 @@ const OtpVerificationPage = () => {
                     position: "top-right",
                     autoClose: 3000,
                 });
-                {isLoading ? <Loading/> : navigate("/signin")}
+                { isLoading ? <Loading /> : navigate("/signin") }
             })
             .catch((err) => {
                 toast.error(err.message || "Failed to verify OTP", {

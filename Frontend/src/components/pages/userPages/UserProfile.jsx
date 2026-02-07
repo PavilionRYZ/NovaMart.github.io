@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import Avatar from 'react-avatar';
 import { updateProfile, logout, clearAuthState } from '../../../redux/slices/authSlice';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../../../storage/fireBase';
@@ -21,6 +22,7 @@ const UserProfile = () => {
     const [uploadError, setUploadError] = useState('');
     const [isUploading, setIsUploading] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(null);
+    const [imageError, setImageError] = useState(false);
     const fileInputRef = useRef(null);
 
     // Handle file selection
@@ -48,6 +50,7 @@ const UserProfile = () => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 setPreviewUrl(e.target.result);
+                setImageError(false);
             };
             reader.readAsDataURL(selectedFile);
 
@@ -82,6 +85,7 @@ const UserProfile = () => {
                 if (result.meta.requestStatus === 'fulfilled') {
                     setFile(null);
                     setPreviewUrl(null);
+                    setImageError(false);
                     return;
                 } else {
                     throw new Error('Failed to update profile');
@@ -108,6 +112,25 @@ const UserProfile = () => {
             dispatch(clearAddressState());
             dispatch(clearOrderState());
         }
+    };
+
+    // Get user display name for avatar
+    const getUserDisplayName = () => {
+        if (user?.firstName && user?.lastName) {
+            return `${user.firstName} ${user.lastName}`;
+        }
+        if (user?.firstName) {
+            return user.firstName;
+        }
+        if (user?.email) {
+            return user.email;
+        }
+        return 'User';
+    };
+
+    // Check if user has avatar
+    const hasAvatar = () => {
+        return !imageError && (previewUrl || (user?.avatar && user.avatar.trim() !== ''));
     };
 
     // Animation variants
@@ -236,21 +259,44 @@ const UserProfile = () => {
                                                     disabled={isUploading}
                                                 >
                                                     <div className="relative">
-                                                        <img
-                                                            src={previewUrl || user.avatar || 'https://via.placeholder.com/200x200/6366f1/ffffff?text=User'}
-                                                            alt="User Avatar"
-                                                            className="h-40 w-40 rounded-2xl object-cover border-4 border-white shadow-xl ring-4 ring-blue-100"
-                                                        />
-                                                        {isUploading && (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
-                                                                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                        {hasAvatar() ? (
+                                                            <>
+                                                                <img
+                                                                    src={previewUrl || user.avatar}
+                                                                    alt="User Avatar"
+                                                                    className="h-40 w-40 rounded-2xl object-cover border-4 border-white shadow-xl ring-4 ring-blue-100"
+                                                                    onError={() => setImageError(true)}
+                                                                />
+                                                                {isUploading && (
+                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
+                                                                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                                    </div>
+                                                                )}
+                                                            </>
+                                                        ) : (
+                                                            <div className="relative">
+                                                                <Avatar
+                                                                    name={getUserDisplayName()}
+                                                                    size="160"
+                                                                    round="16px"
+                                                                    className="border-4 border-white shadow-xl ring-4 ring-blue-100"
+                                                                    colors={['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c', '#16a34a', '#0891b2']}
+                                                                    textSizeRatio={2}
+                                                                />
+                                                                {isUploading && (
+                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
+                                                                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300">
                                                         <div className="text-center text-white">
                                                             <Camera className="h-8 w-8 mx-auto mb-2" />
-                                                            <span className="text-sm font-medium">Change Photo</span>
+                                                            <span className="text-sm font-medium">
+                                                                {hasAvatar() ? 'Change Photo' : 'Upload Photo'}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </motion.button>
