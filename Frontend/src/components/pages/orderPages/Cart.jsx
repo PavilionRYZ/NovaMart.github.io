@@ -107,7 +107,7 @@ const Cart = () => {
                                             Looks like you haven't added anything to your cart yet
                                         </p>
                                         <Button
-                                            onClick={() => navigate('/products')}
+                                            onClick={() => navigate('/search')}
                                             className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-base rounded-xl shadow-lg hover:shadow-xl transition-all"
                                         >
                                             <ShoppingBag className="h-5 w-5 mr-2" />
