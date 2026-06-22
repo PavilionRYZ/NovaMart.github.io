@@ -6,7 +6,19 @@ A full-stack NovaMart e-commerce application built with the MERN stack, featurin
 
 ## 🚀 Live Demo
 
-🌐 **NovaMart**: [novamart-zeta.vercel.app](https://novamart-zeta.vercel.app/)  
+🌐 **NovaMart**: [novamart-zeta.vercel.app](https://novamart-zeta.vercel.app/) 
+
+**Seller Account**: 
+
+Login Email: wobej62351@ocuser.com
+
+Password: Bejs@wo12
+
+**Admin Account**:
+
+Login Email: hadow67027@lidugw.com
+
+Password: hadow@67027
 
 ---
 

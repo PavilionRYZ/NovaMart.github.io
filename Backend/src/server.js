@@ -17,14 +17,13 @@ app.use((req, res, next) => {
 });
 
 //health check endpoint in your backend
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'healthy',
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
   });
 });
-
 
 // Session store
 const mongoStore = MongoStore.create({
@@ -92,6 +91,8 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  // console.log("EMAIL_USER =", process.env.EMAIL_USER);
+  // console.log("EMAIL_PASS exists =", !!process.env.EMAIL_PASS);
 });
 
 process.on("uncaughtException", (err) => {
