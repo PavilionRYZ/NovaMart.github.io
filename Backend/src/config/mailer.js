@@ -3,14 +3,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-
 const requiredEnvVars = ["EMAIL_USER", "EMAIL_PASS"];
 const missingEnvVars = requiredEnvVars.filter(
-  (varName) => !process.env[varName]
+  (varName) => !process.env[varName],
 );
 if (missingEnvVars.length > 0) {
   throw new Error(
-    `Missing required environment variables: ${missingEnvVars.join(", ")}`
+    `Missing required environment variables: ${missingEnvVars.join(", ")}`,
   );
 }
 
@@ -18,7 +17,7 @@ const transporter = nodemailer.createTransport({
   service: "Gmail",
   host: process.env.SMTP_HOST || "smtp.gmail.com",
   port: parseInt(process.env.SMTP_PORT, 10) || 587,
-  secure: process.env.SMTP_PORT === "465", 
+  secure: process.env.SMTP_PORT === "465",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -133,11 +132,79 @@ const sendOtpEmail = async (email, otp) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    // console.log(`OTP email sent to ${email}`);
     return { success: true, message: `OTP email sent to ${email}` };
   } catch (error) {
     console.error(`Error sending OTP email to ${email}:`, error);
     throw new Error(`Failed to send OTP email: ${error.message}`);
+  }
+};
+
+// Function to resend OTP email (for existing users requesting a new code)
+const resendOtpEmail = async (email, otp) => {
+  const content = `
+    <div style="text-align: center; margin-bottom: 32px;">
+        <div style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); width: 88px; height: 88px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);">
+            <span style="font-size: 40px;">🔄</span>
+        </div>
+        <h2 style="margin: 0; color: #1e293b; font-size: 32px; font-weight: 700;">New Verification Code</h2>
+    </div>
+    
+    <p style="color: #475569; font-size: 18px; line-height: 1.7; margin-bottom: 24px; text-align: center;">
+        You requested a new OTP. Here's your fresh verification code for NovaMart.
+    </p>
+    
+    <p style="color: #64748b; font-size: 16px; line-height: 1.6; margin-bottom: 32px; text-align: center;">
+        Use the code below to verify your email address. Any previously sent codes are now invalid.
+    </p>
+    
+    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 16px; padding: 32px; text-align: center; margin: 32px 0; box-shadow: 0 12px 32px rgba(245, 158, 11, 0.25);">
+        <p style="margin: 0 0 12px 0; color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">New Verification Code</p>
+        <div style="color: white; font-size: 36px; font-weight: 800; letter-spacing: 6px; margin: 8px 0;">${otp}</div>
+        <p style="margin: 12px 0 0 0; color: rgba(255,255,255,0.8); font-size: 13px;">⏰ Valid for 5 minutes only</p>
+    </div>
+
+    <div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 12px; padding: 20px; margin: 28px 0;">
+        <div style="display: flex; align-items: flex-start;">
+            <span style="color: #1d4ed8; font-size: 18px; margin-right: 12px;">ℹ️</span>
+            <div>
+                <p style="margin: 0; color: #1e40af; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Previous Code Invalidated</p>
+                <p style="margin: 0; color: #1e3a8a; font-size: 13px; line-height: 1.4;">
+                    Your previous OTP has been replaced. Please use only this new code to verify your account.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 12px; padding: 20px; margin: 28px 0;">
+        <div style="display: flex; align-items: flex-start;">
+            <span style="color: #d97706; font-size: 18px; margin-right: 12px;">⚠️</span>
+            <div>
+                <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Security Notice</p>
+                <p style="margin: 0; color: #b45309; font-size: 13px; line-height: 1.4;">
+                    If you did not request this code, someone may be trying to access your account. Please ignore this email or contact support immediately.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <p style="color: #64748b; font-size: 15px; text-align: center; margin-top: 32px;">
+        Almost there! Verify your email to start shopping. 🛒
+    </p>
+  `;
+
+  const mailOptions = {
+    from: `"NovaMart" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "🔄 NovaMart - Your New Verification Code",
+    html: getEmailTemplate(content),
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return { success: true, message: `Resend OTP email sent to ${email}` };
+  } catch (error) {
+    console.error(`Error resending OTP email to ${email}:`, error);
+    throw new Error(`Failed to resend OTP email: ${error.message}`);
   }
 };
 
@@ -224,7 +291,7 @@ const sendOrderConfirmationEmail = async (
   email,
   orderId,
   orderDate,
-  totalAmount
+  totalAmount,
 ) => {
   const content = `
     <div style="text-align: center; margin-bottom: 32px;">
@@ -253,7 +320,7 @@ const sendOrderConfirmationEmail = async (
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
                 <span style="color: #64748b; font-weight: 600; font-size: 15px;">Order Date</span>
                 <span style="color: #1e293b; font-weight: 700; font-size: 15px;">${new Date(
-                  orderDate
+                  orderDate,
                 ).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
@@ -263,7 +330,7 @@ const sendOrderConfirmationEmail = async (
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
                 <span style="color: #64748b; font-weight: 600; font-size: 15px;">Total Amount</span>
                 <span style="color: #10b981; font-weight: 800; font-size: 18px;">$${totalAmount.toFixed(
-                  2
+                  2,
                 )}</span>
             </div>
         </div>
@@ -317,7 +384,7 @@ const sendOrderConfirmationEmail = async (
   } catch (error) {
     console.error(`Error sending order confirmation email to ${email}:`, error);
     throw new Error(
-      `Failed to send order confirmation email: ${error.message}`
+      `Failed to send order confirmation email: ${error.message}`,
     );
   }
 };
@@ -415,6 +482,7 @@ const sendRoleChangeEmail = async (email, newRole) => {
 
 export {
   sendOtpEmail,
+  resendOtpEmail,
   sendResetPasswordEmail,
   sendOrderConfirmationEmail,
   sendRoleChangeEmail,

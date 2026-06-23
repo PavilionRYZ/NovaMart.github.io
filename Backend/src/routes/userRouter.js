@@ -2,6 +2,7 @@ import express from "express";
 import {
   signup,
   verifyOtp,
+  resendOtp,
   login,
   logout,
   updateProfile,
@@ -43,10 +44,17 @@ const resetLimiter = rateLimit({
   message: "Too many password reset requests, please try again after a minute",
 });
 
+const resendOtpLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: "Too many resend OTP requests, please try again after a minute",
+});
+
 // Manual routes
 router.route("/user/get/me").get(verifyToken, getCurrentUser);
-router.route("/user/signup").post(signup);
+router.route("/user/signup").post(userLimiter, signup);
 router.route("/user/verify-otp").post(verifyOtp);
+router.route("/user/resend-otp").post(resendOtpLimiter, resendOtp);
 router.route("/user/login").post(loginLimiter, login);
 router.route("/user/logout").get(logout);
 router

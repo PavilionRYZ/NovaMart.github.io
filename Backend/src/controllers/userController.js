@@ -6,7 +6,13 @@ import {
   saveOtp,
   verifyOtp as validateOtp,
 } from "../utils/Otp.js";
-import { sendOtpEmail, sendResetPasswordEmail } from "../config/mailer.js";
+import {
+  sendOtpEmail,
+  resendOtpEmail,
+  sendResetPasswordEmail,
+  sendRoleChangeEmail,
+  sendOrderConfirmationEmail,
+} from "../config/mailer.js";
 import {
   generateResetToken,
   saveResetToken,
@@ -59,7 +65,7 @@ const signup = async (req, res, next) => {
 
     if (!email || !password || !firstName) {
       return next(
-        new ErrorHandler("Email, password, and first name are required", 400)
+        new ErrorHandler("Email, password, and first name are required", 400),
       );
     }
 
@@ -70,13 +76,13 @@ const signup = async (req, res, next) => {
 
     if (password.length < 6) {
       return next(
-        new ErrorHandler("Password must be at least 6 characters", 400)
+        new ErrorHandler("Password must be at least 6 characters", 400),
       );
     }
 
     if (firstName.length < 3) {
       return next(
-        new ErrorHandler("First name must be at least 3 characters", 400)
+        new ErrorHandler("First name must be at least 3 characters", 400),
       );
     }
 
@@ -115,7 +121,6 @@ const signup = async (req, res, next) => {
       avatar,
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
-    // console.log(`Temp user saved for ${normalizedEmail}:`, tempUser);
 
     res.status(200).json({ success: true, message: "OTP sent to your email" });
   } catch (error) {
@@ -127,24 +132,20 @@ const signup = async (req, res, next) => {
 const verifyOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
-    // console.log("Verify OTP request:", { email, otp });
 
     if (!email || !otp) {
       return next(new ErrorHandler("Email and OTP are required", 400));
     }
 
-    const normalizedEmail = email.trim().toLowerCase(); // Normalize email
+    const normalizedEmail = email.trim().toLowerCase();
     await validateOtp(normalizedEmail, otp);
 
     const tempUser = await TempUser.findOne({ email: normalizedEmail });
-    // console.log(`Temp user query result for ${normalizedEmail}:`, tempUser);
     if (!tempUser) {
-      // console.error("No temp user found for:", normalizedEmail);
       return next(new ErrorHandler("Session expired or invalid", 400));
     }
 
     if (tempUser.expiresAt < new Date()) {
-      // console.error("Temp user expired for:", normalizedEmail);
       await TempUser.deleteOne({ email: normalizedEmail });
       return next(new ErrorHandler("Session expired", 400));
     }
@@ -160,13 +161,69 @@ const verifyOtp = async (req, res, next) => {
     });
 
     await TempUser.deleteOne({ email: normalizedEmail });
-    // console.log(`User created and temp user deleted for ${normalizedEmail}`);
 
     sendResponseWithToken(newUser, res);
   } catch (error) {
-    // console.error("OTP verification error:", error);
     return next(
-      new ErrorHandler(`OTP verification failed: ${error.message}`, 400)
+      new ErrorHandler(`OTP verification failed: ${error.message}`, 400),
+    );
+  }
+};
+
+// Resend OTP controller — rate-limited to prevent abuse
+const resendOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return next(new ErrorHandler("Email is required", 400));
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return next(new ErrorHandler("Invalid email format", 400));
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Ensure there is a pending temp user session before resending
+    const tempUser = await TempUser.findOne({ email: normalizedEmail });
+    if (!tempUser) {
+      return next(
+        new ErrorHandler(
+          "No pending signup session found. Please sign up again.",
+          400,
+        ),
+      );
+    }
+
+    // Reject if the session itself has expired
+    if (tempUser.expiresAt < new Date()) {
+      await TempUser.deleteOne({ email: normalizedEmail });
+      return next(
+        new ErrorHandler("Signup session expired. Please sign up again.", 400),
+      );
+    }
+
+    // Generate fresh OTP and extend temp user expiry by another 10 minutes
+    const otp = generateOtp();
+    await saveOtp(normalizedEmail, otp);
+
+    await TempUser.findOneAndUpdate(
+      { email: normalizedEmail },
+      { expiresAt: new Date(Date.now() + 10 * 60 * 1000) },
+    );
+
+    await resendOtpEmail(normalizedEmail, otp);
+
+    res.status(200).json({
+      success: true,
+      message: "A new OTP has been sent to your email",
+    });
+  } catch (error) {
+    console.error("Resend OTP error:", error);
+    return next(
+      new ErrorHandler(`Failed to resend OTP: ${error.message}`, 500),
     );
   }
 };
@@ -229,18 +286,17 @@ const updateProfile = async (req, res, next) => {
       return next(new ErrorHandler("No fields to update", 400));
     }
 
-    // Validate fields if provided
     if (firstName && firstName.length < 3) {
       return next(
-        new ErrorHandler("First name must be at least 3 characters", 400)
+        new ErrorHandler("First name must be at least 3 characters", 400),
       );
     }
     if (lastName && lastName.length > 0 && lastName.length < 3) {
       return next(
         new ErrorHandler(
           "Last name must be at least 3 characters if provided",
-          400
-        )
+          400,
+        ),
       );
     }
     if (phone) {
@@ -265,7 +321,7 @@ const updateProfile = async (req, res, next) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
       updatedFields,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     const { password, googleId, refreshToken, ...rest } = updatedUser._doc;
@@ -283,7 +339,7 @@ const updateProfile = async (req, res, next) => {
       return next(new ErrorHandler(`Validation failed: ${message}`, 400));
     }
     return next(
-      new ErrorHandler(`Failed to update profile: ${error.message}`, 500)
+      new ErrorHandler(`Failed to update profile: ${error.message}`, 500),
     );
   }
 };
@@ -302,7 +358,7 @@ const updatePassword = async (req, res, next) => {
 
     if (newPassword.length < 6) {
       return next(
-        new ErrorHandler("New password must be at least 6 characters", 400)
+        new ErrorHandler("New password must be at least 6 characters", 400),
       );
     }
 
@@ -310,8 +366,8 @@ const updatePassword = async (req, res, next) => {
       return next(
         new ErrorHandler(
           "Use forgot password to set a password for Google accounts",
-          400
-        )
+          400,
+        ),
       );
     }
 
@@ -329,7 +385,7 @@ const updatePassword = async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(`Failed to update password: ${error.message}`, 500)
+      new ErrorHandler(`Failed to update password: ${error.message}`, 500),
     );
   }
 };
@@ -361,7 +417,7 @@ const forgotPassword = async (req, res, next) => {
     });
   } catch (error) {
     return next(
-      new ErrorHandler(`Failed to send reset link: ${error.message}`, 500)
+      new ErrorHandler(`Failed to send reset link: ${error.message}`, 500),
     );
   }
 };
@@ -382,7 +438,7 @@ const resetPassword = async (req, res, next) => {
     }
     if (newPassword.length < 6) {
       return next(
-        new ErrorHandler("New password must be at least 6 characters", 400)
+        new ErrorHandler("New password must be at least 6 characters", 400),
       );
     }
     if (newPassword !== confirmNewPassword) {
@@ -406,16 +462,17 @@ const resetPassword = async (req, res, next) => {
       message: "Password updated successfully",
     });
   } catch (error) {
-    // console.log(error);
     return next(
-      new ErrorHandler(`Failed to reset password: ${error.message}`, 400)
+      new ErrorHandler(`Failed to reset password: ${error.message}`, 400),
     );
   }
 };
 
+
 export {
   signup,
   verifyOtp,
+  resendOtp,
   login,
   logout,
   updateProfile,
