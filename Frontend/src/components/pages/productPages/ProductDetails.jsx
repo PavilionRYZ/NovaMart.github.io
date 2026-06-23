@@ -59,13 +59,13 @@ const ProductDetails = () => {
         visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
     };
 
-    const handleaddItemToCart = () => {
+    const handleAddItemToCart = () => {
         if (!product) return;
         if (quantity > product.stock) {
             toast.error("Quantity exceeds available stock");
             return;
         }
-        dispatch(addItemToCart({ product, quantity }));
+        dispatch(addItemToCart({ productId:product._id, quantity }));
         setQuantity(1);
     };
 
@@ -361,7 +361,7 @@ const ProductDetails = () => {
                             </div>
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
-                                    onClick={handleaddItemToCart}
+                                    onClick={handleAddItemToCart}
                                     disabled={product.stock === 0}
                                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center"
                                 >
